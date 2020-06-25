@@ -21,7 +21,9 @@ namespace CRMViewerPlugin
     class Browser : Result
     {
 
-        public enum SelectionType { EntityList, Entity, PickList }
+        public enum SelectionType { EntityList, Entity, PickList,
+            Record
+        }
         public string EntityLogicalName { get; set; }
         public string PicklistLogicalName { get; set; }
 
@@ -239,6 +241,29 @@ namespace CRMViewerPlugin
             Data.DefaultView.Sort = "Key ASC";
         }
 
+        internal void OpenInBrowser()
+        {
+            string rootURI = string.Format("https://{0}:{1}",
+                ((Microsoft.Xrm.Tooling.Connector.CrmServiceClient)service).CrmConnectOrgUriActual.Host,
+                ((Microsoft.Xrm.Tooling.Connector.CrmServiceClient)service).CrmConnectOrgUriActual.Port);
+            string targetUri = null;
+            switch (currentSelectionType)
+            {
+                case SelectionType.EntityList:
+                    targetUri = rootURI;
+                    break;
+                case SelectionType.Entity:
+                    targetUri = string.Format("{0}//main.aspx?etn={1}&pagetype=entitylist", rootURI, EntityLogicalName);
+                    break;
+                case SelectionType.Record: //              FUTURE
+                    targetUri = string.Format("{0}//main.aspx?etn={1}&pagetype=entityrecord&id={2}", rootURI, EntityLogicalName);
+                    break;
+                default:
+                    break;
+            }
+            System.Diagnostics.Process.Start(targetUri);
+        }
+
         private void LoadPicklist(string entityLogicalName, string logicalName)
         {
             currentSelectionType = SelectionType.PickList;
@@ -346,9 +371,9 @@ namespace CRMViewerPlugin
                 cache.Remove(EntityLogicalName);
             switch (currentSelectionType)
             {
-                case SelectionType.EntityList: LoadEntitiesList(worker);break;
-                case SelectionType.Entity: LoadEntityAttributes(EntityLogicalName, worker);break;
-                case SelectionType.PickList:LoadPicklist(EntityLogicalName, PicklistLogicalName);break;
+                case SelectionType.EntityList: LoadEntitiesList(worker); break;
+                case SelectionType.Entity: LoadEntityAttributes(EntityLogicalName, worker); break;
+                case SelectionType.PickList: LoadPicklist(EntityLogicalName, PicklistLogicalName); break;
                 default:
                     break;
             }

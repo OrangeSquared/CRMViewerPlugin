@@ -32,12 +32,13 @@
             this.toolStripMenu = new System.Windows.Forms.ToolStrip();
             this.tsbBack = new System.Windows.Forms.ToolStripButton();
             this.tssSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.tsbSample = new System.Windows.Forms.ToolStripButton();
-            this.gbMain = new System.Windows.Forms.GroupBox();
-            this.dgvMain = new System.Windows.Forms.DataGridView();
             this.tslCached = new System.Windows.Forms.ToolStripLabel();
             this.tsbRefresh = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.tsbSample = new System.Windows.Forms.ToolStripButton();
+            this.gbMain = new System.Windows.Forms.GroupBox();
+            this.dgvMain = new System.Windows.Forms.DataGridView();
+            this.tsbOpenInBrowser = new System.Windows.Forms.ToolStripButton();
             this.toolStripMenu.SuspendLayout();
             this.gbMain.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvMain)).BeginInit();
@@ -48,6 +49,7 @@
             this.toolStripMenu.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStripMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsbBack,
+            this.tsbOpenInBrowser,
             this.tssSeparator1,
             this.tslCached,
             this.tsbRefresh,
@@ -71,6 +73,32 @@
             // 
             this.tssSeparator1.Name = "tssSeparator1";
             this.tssSeparator1.Size = new System.Drawing.Size(6, 25);
+            // 
+            // tslCached
+            // 
+            this.tslCached.BackColor = System.Drawing.SystemColors.Control;
+            this.tslCached.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.tslCached.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.tslCached.ForeColor = System.Drawing.Color.DarkRed;
+            this.tslCached.Name = "tslCached";
+            this.tslCached.Size = new System.Drawing.Size(77, 22);
+            this.tslCached.Text = "Cached Copy";
+            this.tslCached.Visible = false;
+            // 
+            // tsbRefresh
+            // 
+            this.tsbRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.tsbRefresh.Image = ((System.Drawing.Image)(resources.GetObject("tsbRefresh.Image")));
+            this.tsbRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbRefresh.Name = "tsbRefresh";
+            this.tsbRefresh.Size = new System.Drawing.Size(50, 22);
+            this.tsbRefresh.Text = "Refresh";
+            this.tsbRefresh.Click += new System.EventHandler(this.tsbRefresh_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
             // 
             // tsbSample
             // 
@@ -113,31 +141,15 @@
             this.dgvMain.TabIndex = 0;
             this.dgvMain.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvMain_CellDoubleClick);
             // 
-            // tslCached
+            // tsbOpenInBrowser
             // 
-            this.tslCached.BackColor = System.Drawing.SystemColors.Control;
-            this.tslCached.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.tslCached.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.tslCached.ForeColor = System.Drawing.Color.DarkRed;
-            this.tslCached.Name = "tslCached";
-            this.tslCached.Size = new System.Drawing.Size(77, 22);
-            this.tslCached.Text = "Cached Copy";
-            this.tslCached.Visible = false;
-            // 
-            // tsbRefresh
-            // 
-            this.tsbRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.tsbRefresh.Image = ((System.Drawing.Image)(resources.GetObject("tsbRefresh.Image")));
-            this.tsbRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbRefresh.Name = "tsbRefresh";
-            this.tsbRefresh.Size = new System.Drawing.Size(50, 22);
-            this.tsbRefresh.Text = "Refresh";
-            this.tsbRefresh.Click += new System.EventHandler(this.tsbRefresh_Click);
-            // 
-            // toolStripSeparator1
-            // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
+            this.tsbOpenInBrowser.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.tsbOpenInBrowser.Image = ((System.Drawing.Image)(resources.GetObject("tsbOpenInBrowser.Image")));
+            this.tsbOpenInBrowser.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbOpenInBrowser.Name = "tsbOpenInBrowser";
+            this.tsbOpenInBrowser.Size = new System.Drawing.Size(98, 22);
+            this.tsbOpenInBrowser.Text = "Open in Browser";
+            this.tsbOpenInBrowser.Click += new System.EventHandler(this.tsbOpenInBrowser_Click);
             // 
             // ctlCRMViewer
             // 
@@ -167,5 +179,6 @@
         private System.Windows.Forms.ToolStripLabel tslCached;
         private System.Windows.Forms.ToolStripButton tsbRefresh;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripButton tsbOpenInBrowser;
     }
 }

@@ -133,6 +133,9 @@ namespace CRMViewerPlugin
             dgvMain.DataSource = activeList;
             dgvMain.Columns["Key"].Visible = false;
             dgvMain.RowHeadersWidth = dgvMain.ColumnHeadersHeight;
+
+            tsbOpenInBrowser.Visible = (results.Peek().GetType().Name == "Browser");
+
         }
 
         private void dgvMain_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
@@ -196,6 +199,11 @@ namespace CRMViewerPlugin
             WorkAsync(wai);
 
 
+        }
+
+        private void tsbOpenInBrowser_Click(object sender, EventArgs e)
+        {
+            ((Browser)results.Peek()).OpenInBrowser();
         }
     }
 }
