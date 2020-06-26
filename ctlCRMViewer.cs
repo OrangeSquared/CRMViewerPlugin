@@ -207,7 +207,11 @@ namespace CRMViewerPlugin
 
         private void tsbRefresh_Click(object sender, EventArgs e)
         {
+            Refresh();
+        }
 
+        private void Refresh()
+        {
             WorkAsyncInfo wai = new WorkAsyncInfo
             {
                 Message = "Retrieving info from CRM...",
@@ -219,8 +223,6 @@ namespace CRMViewerPlugin
                 MessageWidth = 340
             };
             WorkAsync(wai);
-
-
         }
 
         private void tsbOpenInBrowser_Click(object sender, EventArgs e)
@@ -240,12 +242,31 @@ namespace CRMViewerPlugin
         {
             if (e.KeyCode == Keys.Escape)
                 PageBack();
+
+            if (e.KeyCode == Keys.F2)
+                tsbSearch.Focus();
+
+            if (e.KeyCode == Keys.F5)
+                Refresh();
+
+            if (e.KeyCode == Keys.F4)
+                ((Browser)results.Peek()).OpenInBrowser();
+
         }
 
         private void toolStripMenu_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Escape)
                 PageBack();
+
+            if (e.KeyCode == Keys.F2)
+                tsbSearch.Focus();
+
+            if (e.KeyCode == Keys.F5)
+                Refresh();
+
+            if (e.KeyCode == Keys.F4)
+                ((Browser)results.Peek()).OpenInBrowser();
 
         }
     }
