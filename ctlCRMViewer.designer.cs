@@ -31,6 +31,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ctlCRMViewer));
             this.toolStripMenu = new System.Windows.Forms.ToolStrip();
             this.tsbBack = new System.Windows.Forms.ToolStripButton();
+            this.tsbOpenInBrowser = new System.Windows.Forms.ToolStripButton();
             this.tssSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.tslCached = new System.Windows.Forms.ToolStripLabel();
             this.tsbRefresh = new System.Windows.Forms.ToolStripButton();
@@ -38,7 +39,9 @@
             this.tsbSample = new System.Windows.Forms.ToolStripButton();
             this.gbMain = new System.Windows.Forms.GroupBox();
             this.dgvMain = new System.Windows.Forms.DataGridView();
-            this.tsbOpenInBrowser = new System.Windows.Forms.ToolStripButton();
+            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
+            this.tsbSearch = new System.Windows.Forms.ToolStripTextBox();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenu.SuspendLayout();
             this.gbMain.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvMain)).BeginInit();
@@ -54,12 +57,16 @@
             this.tslCached,
             this.tsbRefresh,
             this.toolStripSeparator1,
-            this.tsbSample});
+            this.tsbSample,
+            this.tsbSearch,
+            this.toolStripLabel1,
+            this.toolStripSeparator2});
             this.toolStripMenu.Location = new System.Drawing.Point(0, 0);
             this.toolStripMenu.Name = "toolStripMenu";
             this.toolStripMenu.Size = new System.Drawing.Size(802, 25);
             this.toolStripMenu.TabIndex = 4;
             this.toolStripMenu.Text = "toolStrip1";
+            this.toolStripMenu.KeyDown += new System.Windows.Forms.KeyEventHandler(this.toolStripMenu_KeyDown);
             // 
             // tsbBack
             // 
@@ -68,6 +75,16 @@
             this.tsbBack.Size = new System.Drawing.Size(36, 22);
             this.tsbBack.Text = "Back";
             this.tsbBack.Click += new System.EventHandler(this.tsbBack_Click);
+            // 
+            // tsbOpenInBrowser
+            // 
+            this.tsbOpenInBrowser.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.tsbOpenInBrowser.Image = ((System.Drawing.Image)(resources.GetObject("tsbOpenInBrowser.Image")));
+            this.tsbOpenInBrowser.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbOpenInBrowser.Name = "tsbOpenInBrowser";
+            this.tsbOpenInBrowser.Size = new System.Drawing.Size(98, 22);
+            this.tsbOpenInBrowser.Text = "Open in Browser";
+            this.tsbOpenInBrowser.Click += new System.EventHandler(this.tsbOpenInBrowser_Click);
             // 
             // tssSeparator1
             // 
@@ -140,16 +157,27 @@
             this.dgvMain.Size = new System.Drawing.Size(784, 380);
             this.dgvMain.TabIndex = 0;
             this.dgvMain.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvMain_CellDoubleClick);
+            this.dgvMain.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dgvMain_KeyDown);
             // 
-            // tsbOpenInBrowser
+            // toolStripLabel1
             // 
-            this.tsbOpenInBrowser.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.tsbOpenInBrowser.Image = ((System.Drawing.Image)(resources.GetObject("tsbOpenInBrowser.Image")));
-            this.tsbOpenInBrowser.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbOpenInBrowser.Name = "tsbOpenInBrowser";
-            this.tsbOpenInBrowser.Size = new System.Drawing.Size(98, 22);
-            this.tsbOpenInBrowser.Text = "Open in Browser";
-            this.tsbOpenInBrowser.Click += new System.EventHandler(this.tsbOpenInBrowser_Click);
+            this.toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripLabel1.Name = "toolStripLabel1";
+            this.toolStripLabel1.Size = new System.Drawing.Size(42, 22);
+            this.toolStripLabel1.Text = "Search";
+            // 
+            // tsbSearch
+            // 
+            this.tsbSearch.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.tsbSearch.Name = "tsbSearch";
+            this.tsbSearch.Size = new System.Drawing.Size(200, 25);
+            this.tsbSearch.TextChanged += new System.EventHandler(this.tsbSearch_TextChanged);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
             // 
             // ctlCRMViewer
             // 
@@ -180,5 +208,8 @@
         private System.Windows.Forms.ToolStripButton tsbRefresh;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripButton tsbOpenInBrowser;
+        private System.Windows.Forms.ToolStripLabel toolStripLabel1;
+        private System.Windows.Forms.ToolStripTextBox tsbSearch;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
     }
 }

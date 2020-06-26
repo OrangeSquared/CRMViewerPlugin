@@ -21,6 +21,8 @@ namespace CRMViewerPlugin
         private Stack<Result> results;
         private DataTable activeList;
 
+        public string CurrentSearchString { get; private set; }
+
         public ctlCRMViewer()
         {
             InitializeComponent();
@@ -130,12 +132,25 @@ namespace CRMViewerPlugin
                 header.Add(r.Header);
             gbMain.Text = string.Join(" <= ", header);
 
-            dgvMain.DataSource = activeList;
+            if (string.IsNullOrEmpty(CurrentSearchString))
+            {
+                dgvMain.DataSource = activeList;
+            }
+            else
+            {
+                List<string> filter = new List<string>();
+                for (int i = 1; i < activeList.Columns.Count; i++)
+                    filter.Add(string.Format("[{0}] LIKE '{1}*'", activeList.Columns[i].ColumnName, CurrentSearchString));
+                string fullfilter = string.Join(" OR ", filter);
+                DataView dv = new DataView(activeList);
+                dv.RowFilter = fullfilter;
+                dgvMain.DataSource = dv;
+            }
+
             dgvMain.Columns["Key"].Visible = false;
             dgvMain.RowHeadersWidth = dgvMain.ColumnHeadersHeight;
 
             tsbOpenInBrowser.Visible = (results.Peek().GetType().Name == "Browser");
-
         }
 
         private void dgvMain_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
@@ -171,10 +186,17 @@ namespace CRMViewerPlugin
 
         private void NewResultsAvailable(RunWorkerCompletedEventArgs runWorkerCompletedEventArgs)
         {
+            CurrentSearchString = null;
             PaintResults();
+            tsbSearch.Text = null;
         }
 
         private void tsbBack_Click(object sender, EventArgs e)
+        {
+            PageBack();
+        }
+
+        private void PageBack()
         {
             if (results.Count > 1)
             {
@@ -204,6 +226,27 @@ namespace CRMViewerPlugin
         private void tsbOpenInBrowser_Click(object sender, EventArgs e)
         {
             ((Browser)results.Peek()).OpenInBrowser();
+        }
+
+        private void tsbSearch_TextChanged(object sender, EventArgs e)
+        {
+            CurrentSearchString= tsbSearch.Text;
+            PaintResults();
+        }
+
+
+
+        private void dgvMain_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Escape)
+                PageBack();
+        }
+
+        private void toolStripMenu_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Escape)
+                PageBack();
+
         }
     }
 }
