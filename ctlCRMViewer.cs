@@ -21,8 +21,6 @@ namespace CRMViewerPlugin
         private Stack<Result> results;
         private DataTable activeList;
 
-        public string CurrentSearchString { get; private set; }
-
         public ctlCRMViewer()
         {
             InitializeComponent();
@@ -132,7 +130,7 @@ namespace CRMViewerPlugin
                 header.Add(r.Header);
             gbMain.Text = string.Join(" <= ", header);
 
-            if (string.IsNullOrEmpty(CurrentSearchString))
+            if (string.IsNullOrEmpty(results.Peek().SearchText))
             {
                 dgvMain.DataSource = activeList;
             }
@@ -140,7 +138,7 @@ namespace CRMViewerPlugin
             {
                 List<string> filter = new List<string>();
                 for (int i = 1; i < activeList.Columns.Count; i++)
-                    filter.Add(string.Format("[{0}] LIKE '{1}*'", activeList.Columns[i].ColumnName, CurrentSearchString));
+                    filter.Add(string.Format("[{0}] LIKE '{1}*'", activeList.Columns[i].ColumnName, results.Peek().SearchText));
                 string fullfilter = string.Join(" OR ", filter);
                 DataView dv = new DataView(activeList);
                 dv.RowFilter = fullfilter;
@@ -149,7 +147,7 @@ namespace CRMViewerPlugin
 
             dgvMain.Columns["Key"].Visible = false;
             dgvMain.RowHeadersWidth = dgvMain.ColumnHeadersHeight;
-
+            tsbSearch.Text = results.Peek().SearchText;
             tsbOpenInBrowser.Visible = (results.Peek().GetType().Name == "Browser");
         }
 
@@ -186,9 +184,7 @@ namespace CRMViewerPlugin
 
         private void NewResultsAvailable(RunWorkerCompletedEventArgs runWorkerCompletedEventArgs)
         {
-            CurrentSearchString = null;
             PaintResults();
-            tsbSearch.Text = null;
         }
 
         private void tsbBack_Click(object sender, EventArgs e)
@@ -232,8 +228,11 @@ namespace CRMViewerPlugin
 
         private void tsbSearch_TextChanged(object sender, EventArgs e)
         {
-            CurrentSearchString= tsbSearch.Text;
-            PaintResults();
+            if (tsbSearch.Text != results.Peek().SearchText)
+            {
+                results.Peek().SearchText = tsbSearch.Text;
+                PaintResults();
+            }
         }
 
 

@@ -28,5 +28,7 @@ namespace CRMViewerPlugin
 
         public bool FromCache { get; set; }
 
+        public string SearchText { get; set; }
+
     }
 }
