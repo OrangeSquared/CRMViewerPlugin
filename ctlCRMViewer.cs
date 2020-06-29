@@ -204,7 +204,10 @@ namespace CRMViewerPlugin
         private void ProgressChanged(ProgressChangedEventArgs progressChangedEventArgs)
         {
             SetWorkingMessage(string.Format("{0}% complete", progressChangedEventArgs.ProgressPercentage));
-            SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs(progressChangedEventArgs.ProgressPercentage, "Loading"));
+            int tic = 1;
+            if (progressChangedEventArgs.ProgressPercentage > 0)
+                tic +=  progressChangedEventArgs.ProgressPercentage % 3;
+            SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs(progressChangedEventArgs.ProgressPercentage, "Loading" + new string('.', tic)));
         }
 
         private void NewResultsAvailable(RunWorkerCompletedEventArgs runWorkerCompletedEventArgs)
