@@ -37,11 +37,15 @@
             this.tsbRefresh = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.tsbSample = new System.Windows.Forms.ToolStripButton();
+            this.tsbSearch = new System.Windows.Forms.ToolStripTextBox();
+            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.gbMain = new System.Windows.Forms.GroupBox();
             this.dgvMain = new System.Windows.Forms.DataGridView();
-            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
-            this.tsbSearch = new System.Windows.Forms.ToolStripTextBox();
-            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.tslRecordID = new System.Windows.Forms.ToolStripLabel();
+            this.tstbRecordID = new System.Windows.Forms.ToolStripTextBox();
+            this.tssRecord = new System.Windows.Forms.ToolStripSeparator();
+            this.tsbLoadRecord = new System.Windows.Forms.ToolStripButton();
             this.toolStripMenu.SuspendLayout();
             this.gbMain.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvMain)).BeginInit();
@@ -57,13 +61,17 @@
             this.tslCached,
             this.tsbRefresh,
             this.toolStripSeparator1,
-            this.tsbSample,
             this.tsbSearch,
             this.toolStripLabel1,
-            this.toolStripSeparator2});
+            this.toolStripSeparator2,
+            this.tslRecordID,
+            this.tstbRecordID,
+            this.tsbLoadRecord,
+            this.tssRecord,
+            this.tsbSample});
             this.toolStripMenu.Location = new System.Drawing.Point(0, 0);
             this.toolStripMenu.Name = "toolStripMenu";
-            this.toolStripMenu.Size = new System.Drawing.Size(802, 25);
+            this.toolStripMenu.Size = new System.Drawing.Size(1128, 25);
             this.toolStripMenu.TabIndex = 4;
             this.toolStripMenu.Text = "toolStrip1";
             this.toolStripMenu.KeyDown += new System.Windows.Forms.KeyEventHandler(this.toolStripMenu_KeyDown);
@@ -125,6 +133,27 @@
             this.tsbSample.Text = "Try me";
             this.tsbSample.Click += new System.EventHandler(this.tsbSample_Click);
             // 
+            // tsbSearch
+            // 
+            this.tsbSearch.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.tsbSearch.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.tsbSearch.Name = "tsbSearch";
+            this.tsbSearch.Size = new System.Drawing.Size(200, 25);
+            this.tsbSearch.TextChanged += new System.EventHandler(this.tsbSearch_TextChanged);
+            // 
+            // toolStripLabel1
+            // 
+            this.toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripLabel1.Name = "toolStripLabel1";
+            this.toolStripLabel1.Size = new System.Drawing.Size(42, 22);
+            this.toolStripLabel1.Text = "Search";
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
+            // 
             // gbMain
             // 
             this.gbMain.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -133,7 +162,7 @@
             this.gbMain.Controls.Add(this.dgvMain);
             this.gbMain.Location = new System.Drawing.Point(3, 28);
             this.gbMain.Name = "gbMain";
-            this.gbMain.Size = new System.Drawing.Size(796, 405);
+            this.gbMain.Size = new System.Drawing.Size(1122, 405);
             this.gbMain.TabIndex = 6;
             this.gbMain.TabStop = false;
             this.gbMain.Text = "gbMain";
@@ -154,30 +183,38 @@
             this.dgvMain.Name = "dgvMain";
             this.dgvMain.ReadOnly = true;
             this.dgvMain.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvMain.Size = new System.Drawing.Size(784, 380);
+            this.dgvMain.Size = new System.Drawing.Size(1110, 380);
             this.dgvMain.TabIndex = 0;
             this.dgvMain.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvMain_CellDoubleClick);
             this.dgvMain.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dgvMain_KeyDown);
             // 
-            // toolStripLabel1
+            // tslRecordID
             // 
-            this.toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(42, 22);
-            this.toolStripLabel1.Text = "Search";
+            this.tslRecordID.Name = "tslRecordID";
+            this.tslRecordID.Size = new System.Drawing.Size(55, 22);
+            this.tslRecordID.Text = "RecordID";
             // 
-            // tsbSearch
+            // tstbRecordID
             // 
-            this.tsbSearch.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.tsbSearch.Name = "tsbSearch";
-            this.tsbSearch.Size = new System.Drawing.Size(200, 25);
-            this.tsbSearch.TextChanged += new System.EventHandler(this.tsbSearch_TextChanged);
+            this.tstbRecordID.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.tstbRecordID.Name = "tstbRecordID";
+            this.tstbRecordID.Size = new System.Drawing.Size(220, 25);
+            this.tstbRecordID.Text = "00000000-0000-0000-0000-000000000000";
             // 
-            // toolStripSeparator2
+            // tssRecord
             // 
-            this.toolStripSeparator2.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
+            this.tssRecord.Name = "tssRecord";
+            this.tssRecord.Size = new System.Drawing.Size(6, 25);
+            // 
+            // tsbLoadRecord
+            // 
+            this.tsbLoadRecord.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.tsbLoadRecord.Image = ((System.Drawing.Image)(resources.GetObject("tsbLoadRecord.Image")));
+            this.tsbLoadRecord.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbLoadRecord.Name = "tsbLoadRecord";
+            this.tsbLoadRecord.Size = new System.Drawing.Size(37, 22);
+            this.tsbLoadRecord.Text = "Load";
+            this.tsbLoadRecord.Click += new System.EventHandler(this.tsbLoadRecord_Click);
             // 
             // ctlCRMViewer
             // 
@@ -186,7 +223,7 @@
             this.Controls.Add(this.gbMain);
             this.Controls.Add(this.toolStripMenu);
             this.Name = "ctlCRMViewer";
-            this.Size = new System.Drawing.Size(802, 436);
+            this.Size = new System.Drawing.Size(1128, 436);
             this.Load += new System.EventHandler(this.MyPluginControl_Load);
             this.toolStripMenu.ResumeLayout(false);
             this.toolStripMenu.PerformLayout();
@@ -211,5 +248,9 @@
         private System.Windows.Forms.ToolStripLabel toolStripLabel1;
         private System.Windows.Forms.ToolStripTextBox tsbSearch;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripLabel tslRecordID;
+        private System.Windows.Forms.ToolStripTextBox tstbRecordID;
+        private System.Windows.Forms.ToolStripButton tsbLoadRecord;
+        private System.Windows.Forms.ToolStripSeparator tssRecord;
     }
 }

@@ -172,6 +172,22 @@ namespace CRMViewerPlugin
             tsbSearch.Text = results.Peek().SearchText;
             tsbOpenInBrowser.Visible = (results.Peek().GetType().Name == "Browser");
 
+            if (results.Peek().GetType().Name == "Browser" && ((Browser)results.Peek()).currentSelectionType == Browser.SelectionType.Entity)
+            {
+                tslRecordID.Visible = true;
+                tstbRecordID.Visible = true;
+                tsbLoadRecord.Visible = true;
+                tssRecord.Visible = true;
+
+            }
+            else
+            {
+                tslRecordID.Visible = false;
+                tstbRecordID.Visible = false;
+                tsbLoadRecord.Visible = false;
+                tssRecord.Visible = false;
+            }
+
             SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs(string.Format("{0} results loaded", dgvMain.Rows.Count)));
         }
 
@@ -296,5 +312,37 @@ namespace CRMViewerPlugin
                 ((Browser)results.Peek()).OpenInBrowser();
 
         }
-    }
+
+        private void tsbLoadRecord_Click(object sender, EventArgs e)
+        { 
+            if (results.Peek().GetType().Name == "Browser" && ((Browser) results.Peek()).currentSelectionType == Browser.SelectionType.Entity)
+            {
+                Guid recordId = Guid.Empty;
+                if (Guid.TryParse(tstbRecordID.Text.Trim(), out recordId))
+                {
+                    WorkAsyncInfo wai = new WorkAsyncInfo
+                    {
+                        Message = "Retrieving info from CRM...",
+                        Work = (worker, args) =>
+                        {
+                            Browser browser = new Browser(Service);
+                            browser.LoadRecord(((Browser)results.Peek()).EntityLogicalName, recordId, worker);
+                            Result result = browser;
+
+                            if (result != null)
+                                results.Push(result);
+                        },
+                        ProgressChanged = ProgressChanged,
+                        PostWorkCallBack = NewResultsAvailable,
+                        AsyncArgument = null,
+                        MessageHeight = 150,
+                        MessageWidth = 340
+                    };
+                    WorkAsync(wai);
+
+                    
+                }
+            }
+        }
+}
 }

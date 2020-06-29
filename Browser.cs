@@ -2,10 +2,12 @@
 using Microsoft.Xrm.Sdk.Client;
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata;
+using Microsoft.Xrm.Sdk.Query;
 using NuGet;
 using ScintillaNET;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Linq;
@@ -21,11 +23,17 @@ namespace CRMViewerPlugin
     class Browser : Result
     {
 
-        public enum SelectionType { EntityList, Entity, PickList,
+        public enum SelectionType
+        {
+            EntityList, Entity, PickList,
             Record
         }
         public string EntityLogicalName { get; set; }
+        public Guid EntityRecordId { get; set; }
         public string PicklistLogicalName { get; set; }
+
+        private List<Tuple<string, string, int, string>> _optionSetValues;
+
 
         public override string Header => currentSelection;
 
@@ -325,6 +333,74 @@ namespace CRMViewerPlugin
             Data.DefaultView.Sort = "Value ASC";
         }
 
+        internal void LoadRecord(string entityLogicalName, Guid recordId, BackgroundWorker worker)
+        {
+            this.EntityLogicalName = entityLogicalName;
+            Data = new DataTable();
+
+            Data.Columns.AddRange(
+                new DataColumn[]
+                {
+                    new DataColumn("Key", typeof(string)),
+                    new DataColumn("Logical Name", typeof(string)),
+                    new DataColumn("Display Name", typeof(string)),
+                    new DataColumn("Data Type", typeof(string)),
+                    new DataColumn("Value", typeof(string))
+                }) ;
+
+            string fetchXml = null;
+
+            if (recordId != Guid.Empty)
+                fetchXml = string.Format(@"
+                    <fetch top='1'>
+                      <entity name='{0}'>
+                        <filter>
+                          <condition attribute='{0}id' operator='eq' value='{1}'/>
+                        </filter>
+                      </entity>
+                    </fetch>", EntityLogicalName, recordId);
+            else
+                fetchXml = string.Format(@"
+                    <fetch top='1'>
+                      <entity name='{0}'>
+                      </entity>
+                    </fetch>", EntityLogicalName);
+
+            EntityCollection ec = service.RetrieveMultiple(new FetchExpression(fetchXml));
+
+            if (ec == null || ec.Entities.Count <= 0)
+            {
+                DataRow dr = Data.NewRow();
+                dr[0] = "RNF";
+                dr[1] = "Record";
+                dr[2] = "not";
+                dr[3] = "found.";
+                Data.Rows.Add(dr);
+            }
+            else
+            {
+                Entity entity = ec[0];
+                this.EntityRecordId = entity.Id;
+                Browser entityResult = new Browser(service);
+                entityResult.LoadEntityAttributes(entityLogicalName, worker);
+
+                //////// do sorting
+
+                foreach (DataRow edr in entityResult.Data.Rows)
+                {
+                    DataRow dr = Data.NewRow();
+                    dr[0] = edr[0];
+                    dr[1] = edr[1];
+                    dr[2] = edr[2];
+                    dr[3] = edr[4];
+                    if (entity.Contains((string)edr[1]))
+                        dr[4] = EntityValueFormat(entity, (string)edr[1]);
+                    //else
+                    //  dr[2] = "<NULL>";
+                    Data.Rows.Add(dr);
+                }
+            }
+        }
 
         public override Result ProcessSelection(object selection, System.ComponentModel.BackgroundWorker worker)
         {
@@ -378,5 +454,68 @@ namespace CRMViewerPlugin
                     break;
             }
         }
+
+        internal string EntityValueFormat(Entity entity, string AttributeLogicalName)
+        {
+            switch (entity.Attributes[AttributeLogicalName].GetType().Name)
+            {
+                case "Int32": return entity.GetAttributeValue<Int32>(AttributeLogicalName).ToString(); break;
+                case "String": return entity.GetAttributeValue<string>(AttributeLogicalName).Replace("\r\n", "<p>"); break;
+                case "Boolean": return entity.GetAttributeValue<bool>(AttributeLogicalName) ? "True" : "False"; break;
+                case "DateTime": return entity.GetAttributeValue<DateTime>(AttributeLogicalName).ToString("yyyy-MM-ddTHH:mm:ss"); break;
+                case "Guid": return entity.GetAttributeValue<Guid>(AttributeLogicalName).ToString(); break;
+                case "OptionSetValue":
+                    return GetOptionSetValue(entity.LogicalName, AttributeLogicalName, entity.GetAttributeValue<OptionSetValue>(AttributeLogicalName).Value);
+                    break;
+
+                case "EntityReference":
+                    EntityReference er = entity.GetAttributeValue<EntityReference>(AttributeLogicalName);
+                    return string.Format("{0} ({1}:{2})", er.Name, er.LogicalName, er.Id);
+                    break;
+
+                case "Money":
+                    return entity.GetAttributeValue<Money>(AttributeLogicalName).Value.ToString("c");
+
+                default:
+                    return entity[AttributeLogicalName].GetType().Name;
+                    break;
+            }
+        }
+
+        public string GetOptionSetValue(string Entity, string Attribute, int Value)
+        {
+            if (_optionSetValues == null) _optionSetValues = new List<Tuple<string, string, int, string>>();
+
+            if (!_optionSetValues.Any(x => (x.Item1 == Entity && x.Item2 == Attribute && x.Item3 == Value)))
+            {
+                RetrieveAttributeRequest rar = new RetrieveAttributeRequest()
+                {
+                    EntityLogicalName = Entity,
+                    LogicalName = Attribute,
+                    RetrieveAsIfPublished = true
+                };
+                RetrieveAttributeResponse rarr = (RetrieveAttributeResponse)service.Execute(rar);
+
+                OptionMetadata op = null;
+                if (rarr.AttributeMetadata.GetType().Name == "PicklistAttributeMetadata")
+                    if (((PicklistAttributeMetadata)rarr.AttributeMetadata).OptionSet.Options.Count > 0)
+                        op = ((PicklistAttributeMetadata)rarr.AttributeMetadata).OptionSet.Options.First(x => x.Value == Value);
+
+                if (rarr.AttributeMetadata.GetType().Name == "StateAttributeMetadata")
+                    op = ((StateAttributeMetadata)rarr.AttributeMetadata).OptionSet.Options.First(x => x.Value == Value);
+
+                if (rarr.AttributeMetadata.GetType().Name == "StatusAttributeMetadata")
+                    op = ((StatusAttributeMetadata)rarr.AttributeMetadata).OptionSet.Options.First(x => x.Value == Value);
+
+                if (op != null)
+                    _optionSetValues.Add(new Tuple<string, string, int, string>(Entity, Attribute, Value, op.Label.LocalizedLabels[0].Label));
+                else
+                    _optionSetValues.Add(new Tuple<string, string, int, string>(Entity, Attribute, Value, "UNKNOWN"));
+            }
+
+            Tuple<string, string, int, string> record = _optionSetValues.Find(x => (x.Item1 == Entity && x.Item2 == Attribute && x.Item3 == Value));
+            return string.Format("({0}) {1}", record.Item3, record.Item4);
+        }
+
     }
 }
