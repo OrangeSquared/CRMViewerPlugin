@@ -12,14 +12,18 @@ using Microsoft.Xrm.Sdk.Query;
 using Microsoft.Xrm.Sdk;
 using McTools.Xrm.Connection;
 using System.Dynamic;
+using XrmToolBox.Extensibility.Interfaces;
+using XrmToolBox.Extensibility.Args;
 
 namespace CRMViewerPlugin
 {
-    public partial class ctlCRMViewer : PluginControlBase
+    public partial class ctlCRMViewer : PluginControlBase, IStatusBarMessenger
     {
         private Settings mySettings;
         private Stack<Result> results;
         private DataTable activeList;
+
+        public event EventHandler<StatusBarMessageEventArgs> SendMessageToStatusBar;
 
         public ctlCRMViewer()
         {
@@ -167,6 +171,8 @@ namespace CRMViewerPlugin
             dgvMain.RowHeadersWidth = dgvMain.ColumnHeadersHeight;
             tsbSearch.Text = results.Peek().SearchText;
             tsbOpenInBrowser.Visible = (results.Peek().GetType().Name == "Browser");
+
+            SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs(string.Format("{0} results loaded", dgvMain.Rows.Count)));
         }
 
         private void dgvMain_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
@@ -198,6 +204,7 @@ namespace CRMViewerPlugin
         private void ProgressChanged(ProgressChangedEventArgs progressChangedEventArgs)
         {
             SetWorkingMessage(string.Format("{0}% complete", progressChangedEventArgs.ProgressPercentage));
+            SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs(progressChangedEventArgs.ProgressPercentage, "Loading"));
         }
 
         private void NewResultsAvailable(RunWorkerCompletedEventArgs runWorkerCompletedEventArgs)
