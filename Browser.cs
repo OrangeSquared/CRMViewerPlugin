@@ -264,8 +264,9 @@ namespace CRMViewerPlugin
                     targetUri = string.Format("{0}//main.aspx?etn={1}&pagetype=entitylist", rootURI, EntityLogicalName);
                     break;
                 case SelectionType.Record: //              FUTURE
-                    targetUri = string.Format("{0}//main.aspx?etn={1}&pagetype=entityrecord&id={2}", rootURI, EntityLogicalName);
+                    targetUri = string.Format("{0}//main.aspx?etn={1}&pagetype=entityrecord&id={2}", rootURI, EntityLogicalName, EntityRecordId);
                     break;
+
                 default:
                     break;
             }
@@ -336,6 +337,7 @@ namespace CRMViewerPlugin
         internal void LoadRecord(string entityLogicalName, Guid recordId, BackgroundWorker worker)
         {
             this.EntityLogicalName = entityLogicalName;
+            this.currentSelectionType = SelectionType.Record;
             Data = new DataTable();
 
             Data.Columns.AddRange(

@@ -46,6 +46,7 @@
             this.tstbRecordID = new System.Windows.Forms.ToolStripTextBox();
             this.tssRecord = new System.Windows.Forms.ToolStripSeparator();
             this.tsbLoadRecord = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenu.SuspendLayout();
             this.gbMain.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvMain)).BeginInit();
@@ -56,6 +57,7 @@
             this.toolStripMenu.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStripMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsbBack,
+            this.toolStripSeparator3,
             this.tsbOpenInBrowser,
             this.tssSeparator1,
             this.tslCached,
@@ -216,6 +218,11 @@
             this.tsbLoadRecord.Text = "Load";
             this.tsbLoadRecord.Click += new System.EventHandler(this.tsbLoadRecord_Click);
             // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
+            // 
             // ctlCRMViewer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -252,5 +259,6 @@
         private System.Windows.Forms.ToolStripTextBox tstbRecordID;
         private System.Windows.Forms.ToolStripButton tsbLoadRecord;
         private System.Windows.Forms.ToolStripSeparator tssRecord;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
     }
 }
