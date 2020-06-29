@@ -116,8 +116,26 @@ namespace CRMViewerPlugin
 
         private void LoadTopMenu()
         {
-            results.Push(new TopMenu(Service));
-            PaintResults();
+            //results.Push(new TopMenu(Service));
+
+            WorkAsyncInfo wai = new WorkAsyncInfo
+            {
+                Message = "Retrieving info from CRM...",
+                Work = (worker, args) =>
+                {
+                    Browser browser = new Browser(Service);
+                    browser.LoadEntitiesList(worker);
+
+                    if (browser != null)
+                        results.Push(browser);
+                },
+                ProgressChanged = ProgressChanged,
+                PostWorkCallBack = NewResultsAvailable,
+                AsyncArgument = null,
+                MessageHeight = 150,
+                MessageWidth = 340
+            };
+            WorkAsync(wai);
         }
 
         private void PaintResults()
