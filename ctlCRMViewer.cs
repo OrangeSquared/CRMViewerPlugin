@@ -323,6 +323,7 @@ namespace CRMViewerPlugin
                 DoQuickSearch();
             }
 
+
             else if ("ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_-".Contains(e.KeyCode.ToString()))
             {
                 quickSearchReverse = false;
