@@ -23,6 +23,10 @@ namespace CRMViewerPlugin
         private Stack<Result> results;
         private DataTable activeList;
 
+        private string quickSearch = null;
+        private DateTime quickSearchTimeout;
+        private bool quickSearchReverse = false;
+
         public event EventHandler<StatusBarMessageEventArgs> SendMessageToStatusBar;
 
         public ctlCRMViewer()
@@ -160,7 +164,7 @@ namespace CRMViewerPlugin
             {
                 List<string> filter = new List<string>();
                 for (int i = 1; i < activeList.Columns.Count; i++)
-                    filter.Add(string.Format("[{0}] LIKE '{1}*'", activeList.Columns[i].ColumnName, results.Peek().SearchText));
+                    filter.Add(string.Format("[{0}] LIKE '*{1}*'", activeList.Columns[i].ColumnName, results.Peek().SearchText));
                 string fullfilter = string.Join(" OR ", filter);
                 DataView dv = new DataView(activeList);
                 dv.RowFilter = fullfilter;
@@ -222,7 +226,7 @@ namespace CRMViewerPlugin
             SetWorkingMessage(string.Format("{0}% complete", progressChangedEventArgs.ProgressPercentage));
             int tic = 1;
             if (progressChangedEventArgs.ProgressPercentage > 0)
-                tic +=  progressChangedEventArgs.ProgressPercentage % 3;
+                tic += progressChangedEventArgs.ProgressPercentage % 3;
             SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs(progressChangedEventArgs.ProgressPercentage, "Loading" + new string('.', tic)));
         }
 
@@ -286,15 +290,80 @@ namespace CRMViewerPlugin
             if (e.KeyCode == Keys.Escape)
                 PageBack();
 
-            if (e.KeyCode == Keys.F2)
+            else if (e.KeyCode == Keys.F2)
                 tsbSearch.Focus();
 
-            if (e.KeyCode == Keys.F5)
+            else if (e.KeyCode == Keys.F5)
                 Refresh();
 
-            if (e.KeyCode == Keys.F4)
+            else if (e.KeyCode == Keys.F4)
                 ((Browser)results.Peek()).OpenInBrowser();
 
+            else if (e.KeyCode == Keys.Left)
+            {
+                quickSearchReverse = true;
+                if (dgvMain.SelectedRows[0].Index == 0)
+                    dgvMain.Rows[dgvMain.Rows.Count - 1].Selected = true;
+                else if (dgvMain.SelectedRows[0].Index == (dgvMain.Rows.Count - 1))
+                    dgvMain.Rows[0].Selected = true;
+                else
+                    dgvMain.Rows[dgvMain.SelectedRows[0].Index - 1].Selected = true;
+
+                DoQuickSearch();
+            }
+
+            else if (e.KeyCode == Keys.Right)
+            {
+                quickSearchReverse = false;
+                if (dgvMain.SelectedRows[0].Index == (dgvMain.Rows.Count - 1))
+                    dgvMain.Rows[0].Selected = true;
+                else
+                    dgvMain.Rows[dgvMain.SelectedRows[0].Index + 1].Selected = true;
+
+                DoQuickSearch();
+            }
+
+            else if ("ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_-".Contains(e.KeyCode.ToString()))
+            {
+                quickSearchReverse = false;
+                if (quickSearchTimeout > DateTime.Now)
+                    quickSearch += e.KeyCode.ToString();
+                else
+                    quickSearch = e.KeyCode.ToString();
+                quickSearchTimeout = DateTime.Now.AddMilliseconds(500);
+                SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs(string.Format("searching '{0}'", quickSearch)));
+                DoQuickSearch();
+            }
+        }
+
+        private void DoQuickSearch()
+        {
+            if (!string.IsNullOrEmpty(quickSearch) && quickSearch.Length >= 3)
+            {
+                if (dgvMain.SelectedRows.Count == 0)
+                    if (quickSearchReverse)
+                        dgvMain.Rows[dgvMain.RowCount - 1].Selected = true;
+                    else
+                        dgvMain.Rows[0].Selected = true;
+
+                int selected = dgvMain.SelectedRows[0].Index;
+                bool found = false;
+                while (selected < dgvMain.Rows.Count && selected > -1)
+                {
+                    foreach (DataGridViewCell col in dgvMain.Rows[selected].Cells)
+                        if (col.Value.ToString().ToUpper().Contains(quickSearch))
+                        {
+                            dgvMain.Rows[selected].Selected = true;
+                            dgvMain.Rows[selected].Visible = true;
+                            dgvMain.CurrentCell = dgvMain.Rows[selected].Cells[1];
+                            SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs(string.Format("found '{0}'", quickSearch)));
+                            found = true;
+                            break;
+                        }
+                    if (found) break;
+                    selected += quickSearchReverse ? -1 : 1;
+                }
+            }
         }
 
         private void toolStripMenu_KeyDown(object sender, KeyEventArgs e)
@@ -314,8 +383,8 @@ namespace CRMViewerPlugin
         }
 
         private void tsbLoadRecord_Click(object sender, EventArgs e)
-        { 
-            if (results.Peek().GetType().Name == "Browser" && ((Browser) results.Peek()).currentSelectionType == Browser.SelectionType.Entity)
+        {
+            if (results.Peek().GetType().Name == "Browser" && ((Browser)results.Peek()).currentSelectionType == Browser.SelectionType.Entity)
             {
                 Guid recordId = Guid.Empty;
                 if (Guid.TryParse(tstbRecordID.Text.Trim(), out recordId))
@@ -340,9 +409,9 @@ namespace CRMViewerPlugin
                     };
                     WorkAsync(wai);
 
-                    
+
                 }
             }
         }
-}
+    }
 }

@@ -31,22 +31,21 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ctlCRMViewer));
             this.toolStripMenu = new System.Windows.Forms.ToolStrip();
             this.tsbBack = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.tsbOpenInBrowser = new System.Windows.Forms.ToolStripButton();
             this.tssSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.tslCached = new System.Windows.Forms.ToolStripLabel();
             this.tsbRefresh = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.tsbSample = new System.Windows.Forms.ToolStripButton();
             this.tsbSearch = new System.Windows.Forms.ToolStripTextBox();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.gbMain = new System.Windows.Forms.GroupBox();
-            this.dgvMain = new System.Windows.Forms.DataGridView();
             this.tslRecordID = new System.Windows.Forms.ToolStripLabel();
             this.tstbRecordID = new System.Windows.Forms.ToolStripTextBox();
-            this.tssRecord = new System.Windows.Forms.ToolStripSeparator();
             this.tsbLoadRecord = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.tssRecord = new System.Windows.Forms.ToolStripSeparator();
+            this.gbMain = new System.Windows.Forms.GroupBox();
+            this.dgvMain = new System.Windows.Forms.DataGridView();
             this.toolStripMenu.SuspendLayout();
             this.gbMain.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvMain)).BeginInit();
@@ -69,8 +68,7 @@
             this.tslRecordID,
             this.tstbRecordID,
             this.tsbLoadRecord,
-            this.tssRecord,
-            this.tsbSample});
+            this.tssRecord});
             this.toolStripMenu.Location = new System.Drawing.Point(0, 0);
             this.toolStripMenu.Name = "toolStripMenu";
             this.toolStripMenu.Size = new System.Drawing.Size(1128, 25);
@@ -85,6 +83,11 @@
             this.tsbBack.Size = new System.Drawing.Size(36, 22);
             this.tsbBack.Text = "Back";
             this.tsbBack.Click += new System.EventHandler(this.tsbBack_Click);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
             // 
             // tsbOpenInBrowser
             // 
@@ -127,14 +130,6 @@
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
             // 
-            // tsbSample
-            // 
-            this.tsbSample.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.tsbSample.Name = "tsbSample";
-            this.tsbSample.Size = new System.Drawing.Size(46, 22);
-            this.tsbSample.Text = "Try me";
-            this.tsbSample.Click += new System.EventHandler(this.tsbSample_Click);
-            // 
             // tsbSearch
             // 
             this.tsbSearch.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
@@ -155,6 +150,34 @@
             this.toolStripSeparator2.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.toolStripSeparator2.Name = "toolStripSeparator2";
             this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
+            // 
+            // tslRecordID
+            // 
+            this.tslRecordID.Name = "tslRecordID";
+            this.tslRecordID.Size = new System.Drawing.Size(55, 22);
+            this.tslRecordID.Text = "RecordID";
+            // 
+            // tstbRecordID
+            // 
+            this.tstbRecordID.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.tstbRecordID.Name = "tstbRecordID";
+            this.tstbRecordID.Size = new System.Drawing.Size(225, 25);
+            this.tstbRecordID.Text = "00000000-0000-0000-0000-000000000000";
+            // 
+            // tsbLoadRecord
+            // 
+            this.tsbLoadRecord.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.tsbLoadRecord.Image = ((System.Drawing.Image)(resources.GetObject("tsbLoadRecord.Image")));
+            this.tsbLoadRecord.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbLoadRecord.Name = "tsbLoadRecord";
+            this.tsbLoadRecord.Size = new System.Drawing.Size(37, 22);
+            this.tsbLoadRecord.Text = "Load";
+            this.tsbLoadRecord.Click += new System.EventHandler(this.tsbLoadRecord_Click);
+            // 
+            // tssRecord
+            // 
+            this.tssRecord.Name = "tssRecord";
+            this.tssRecord.Size = new System.Drawing.Size(6, 25);
             // 
             // gbMain
             // 
@@ -190,39 +213,6 @@
             this.dgvMain.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvMain_CellDoubleClick);
             this.dgvMain.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dgvMain_KeyDown);
             // 
-            // tslRecordID
-            // 
-            this.tslRecordID.Name = "tslRecordID";
-            this.tslRecordID.Size = new System.Drawing.Size(55, 22);
-            this.tslRecordID.Text = "RecordID";
-            // 
-            // tstbRecordID
-            // 
-            this.tstbRecordID.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.tstbRecordID.Name = "tstbRecordID";
-            this.tstbRecordID.Size = new System.Drawing.Size(220, 25);
-            this.tstbRecordID.Text = "00000000-0000-0000-0000-000000000000";
-            // 
-            // tssRecord
-            // 
-            this.tssRecord.Name = "tssRecord";
-            this.tssRecord.Size = new System.Drawing.Size(6, 25);
-            // 
-            // tsbLoadRecord
-            // 
-            this.tsbLoadRecord.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.tsbLoadRecord.Image = ((System.Drawing.Image)(resources.GetObject("tsbLoadRecord.Image")));
-            this.tsbLoadRecord.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbLoadRecord.Name = "tsbLoadRecord";
-            this.tsbLoadRecord.Size = new System.Drawing.Size(37, 22);
-            this.tsbLoadRecord.Text = "Load";
-            this.tsbLoadRecord.Click += new System.EventHandler(this.tsbLoadRecord_Click);
-            // 
-            // toolStripSeparator3
-            // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
-            // 
             // ctlCRMViewer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -244,7 +234,6 @@
         #endregion
         private System.Windows.Forms.ToolStrip toolStripMenu;
         private System.Windows.Forms.ToolStripButton tsbBack;
-        private System.Windows.Forms.ToolStripButton tsbSample;
         private System.Windows.Forms.ToolStripSeparator tssSeparator1;
         private System.Windows.Forms.GroupBox gbMain;
         private System.Windows.Forms.DataGridView dgvMain;
