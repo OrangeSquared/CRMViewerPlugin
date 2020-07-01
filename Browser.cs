@@ -103,10 +103,6 @@ namespace CRMViewerPlugin
             service = Service;
         }
 
-
-
-
-
         internal void LoadEntitiesList(System.ComponentModel.BackgroundWorker worker)
         {
             currentSelectionType = SelectionType.EntityList;
