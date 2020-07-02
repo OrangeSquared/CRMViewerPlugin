@@ -46,6 +46,7 @@
             this.tssRecord = new System.Windows.Forms.ToolStripSeparator();
             this.gbMain = new System.Windows.Forms.GroupBox();
             this.dgvMain = new System.Windows.Forms.DataGridView();
+            this.stbCustomFields = new System.Windows.Forms.ToolStripButton();
             this.toolStripMenu.SuspendLayout();
             this.gbMain.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvMain)).BeginInit();
@@ -58,6 +59,7 @@
             this.tsbBack,
             this.toolStripSeparator3,
             this.tsbOpenInBrowser,
+            this.stbCustomFields,
             this.tssSeparator1,
             this.tslCached,
             this.tsbRefresh,
@@ -133,7 +135,6 @@
             // tsbSearch
             // 
             this.tsbSearch.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.tsbSearch.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.tsbSearch.Name = "tsbSearch";
             this.tsbSearch.Size = new System.Drawing.Size(200, 25);
             this.tsbSearch.TextChanged += new System.EventHandler(this.tsbSearch_TextChanged);
@@ -159,7 +160,6 @@
             // 
             // tstbRecordID
             // 
-            this.tstbRecordID.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.tstbRecordID.Name = "tstbRecordID";
             this.tstbRecordID.Size = new System.Drawing.Size(225, 25);
             this.tstbRecordID.Text = "00000000-0000-0000-0000-000000000000";
@@ -213,6 +213,16 @@
             this.dgvMain.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvMain_CellDoubleClick);
             this.dgvMain.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dgvMain_KeyDown);
             // 
+            // stbCustomFields
+            // 
+            this.stbCustomFields.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.stbCustomFields.Image = ((System.Drawing.Image)(resources.GetObject("stbCustomFields.Image")));
+            this.stbCustomFields.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.stbCustomFields.Name = "stbCustomFields";
+            this.stbCustomFields.Size = new System.Drawing.Size(81, 22);
+            this.stbCustomFields.Text = "Show Default";
+            this.stbCustomFields.Click += new System.EventHandler(this.stbCustomFields_Click);
+            // 
             // ctlCRMViewer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -249,5 +259,6 @@
         private System.Windows.Forms.ToolStripButton tsbLoadRecord;
         private System.Windows.Forms.ToolStripSeparator tssRecord;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+        private System.Windows.Forms.ToolStripButton stbCustomFields;
     }
 }

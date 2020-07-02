@@ -15,7 +15,7 @@ namespace CRMViewerPlugin
 
         public override string Status => "done.";
 
-        public override Result ProcessSelection(object selection, BackgroundWorker worker)
+        public override Result ProcessSelection(object sender, object selection, BackgroundWorker worker)
         {
             return null;
         }

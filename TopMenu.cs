@@ -36,7 +36,7 @@ namespace CRMViewerPlugin
             Data.Rows.Add(dr);
         }
 
-        public override Result ProcessSelection(object selection, System.ComponentModel.BackgroundWorker worker)
+        public override Result ProcessSelection(object sender, object selection, System.ComponentModel.BackgroundWorker worker)
         {
             Result retVal = null;
             switch (selection as string)

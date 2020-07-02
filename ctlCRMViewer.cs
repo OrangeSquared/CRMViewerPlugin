@@ -182,7 +182,6 @@ namespace CRMViewerPlugin
                 tstbRecordID.Visible = true;
                 tsbLoadRecord.Visible = true;
                 tssRecord.Visible = true;
-
             }
             else
             {
@@ -193,6 +192,10 @@ namespace CRMViewerPlugin
             }
 
             SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs(string.Format("{0} results loaded", dgvMain.Rows.Count)));
+
+            stbCustomFields.Visible = (results.Peek().GetType().Name == "Browser" &&
+                (((Browser)results.Peek()).currentSelectionType == Browser.SelectionType.Entity ||
+                 ((Browser)results.Peek()).currentSelectionType == Browser.SelectionType.Record));
         }
 
         private void dgvMain_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
@@ -206,8 +209,7 @@ namespace CRMViewerPlugin
                 Message = "Retrieving info from CRM...",
                 Work = (worker, args) =>
                   {
-                      Result result = results.Peek().ProcessSelection(key, worker);
-
+                      Result result = results.Peek().ProcessSelection(this, key, worker);
 
                       if (result != null)
                           results.Push(result);
@@ -282,8 +284,6 @@ namespace CRMViewerPlugin
                 PaintResults();
             }
         }
-
-
 
         private void dgvMain_KeyDown(object sender, KeyEventArgs e)
         {
@@ -396,7 +396,7 @@ namespace CRMViewerPlugin
                         Work = (worker, args) =>
                         {
                             Browser browser = new Browser(Service);
-                            browser.LoadRecord(((Browser)results.Peek()).EntityLogicalName, recordId, worker);
+                            browser.LoadRecord(((Browser)results.Peek()).EntityLogicalName, recordId, stbCustomFields.Checked, worker);
                             Result result = browser;
 
                             if (result != null)
@@ -412,6 +412,37 @@ namespace CRMViewerPlugin
 
 
                 }
+            }
+        }
+
+        private void stbCustomFields_Click(object sender, EventArgs e)
+        {
+            stbCustomFields.Checked = !stbCustomFields.Checked;
+            mySettings.ShowDefaultAttributes = stbCustomFields.Checked;
+            SettingsManager.Instance.Save(GetType(), mySettings);
+            WorkAsyncInfo wai = new WorkAsyncInfo
+            {
+                Message = "Retrieving info from CRM...",
+                Work = (worker, args) =>
+                {
+                    results.Peek().Refresh(worker);
+                },
+                ProgressChanged = ProgressChanged,
+                PostWorkCallBack = NewResultsAvailable,
+                AsyncArgument = null,
+                MessageHeight = 150,
+                MessageWidth = 340
+            };
+            WorkAsync(wai);
+            
+        }
+
+        internal string SettingValue(string key)
+        {
+            switch (key)
+            {
+                case "showDefaultAttributes": return stbCustomFields.Checked ? "true" : "false"; break;
+                default: return ""; break;
             }
         }
     }

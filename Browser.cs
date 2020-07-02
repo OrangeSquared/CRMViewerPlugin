@@ -22,6 +22,40 @@ namespace CRMViewerPlugin
 {
     class Browser : Result
     {
+        public ctlCRMViewer control { get; set; }
+
+        public bool ShowDefaultAttributes
+        {
+            get
+            {
+                bool retVal = true;
+                if (control != null)
+                    retVal = control.SettingValue("showDefaultAttributes") == "true";
+
+                return retVal;
+            }
+        }
+
+        private string[] defaultAttributes = new string[]
+        {
+            "createdby",
+            "createdon",
+            "createdonbehalfby",
+            "importsequencenumber",
+            "modifiedby",
+            "modifiedon",
+            "modifiedonbehalfby",
+            "overriddencreatedon",
+            "ownerid",
+            "owningbusinessunit",
+            "owningteam",
+            "owninguser",
+            "timezoneruleversionnumber",
+            "utcconversiontimezonecode",
+            "versionnumber",
+            "statecode",
+            "statuscode",
+        };
 
         public enum SelectionType
         {
@@ -145,7 +179,7 @@ namespace CRMViewerPlugin
             Data.DefaultView.Sort = "Key ASC";
         }
 
-        public void LoadEntityAttributes(string entityLogicalName, System.ComponentModel.BackgroundWorker worker)
+        public void LoadEntityAttributes(string entityLogicalName, bool showDefaultAttributes, System.ComponentModel.BackgroundWorker worker)
         {
             //SettingsManager.Instance.TryLoad(GetType(),out )
             //SettingsManager.Instance.TryLoad(GetType(), out mySettings)
@@ -164,11 +198,11 @@ namespace CRMViewerPlugin
                 Data.Columns.AddRange(
                     new DataColumn[] {
                     new DataColumn("Key", typeof(string)),
-                    new DataColumn("LogicalName", typeof(string)),
-                    new DataColumn("DisplayName", typeof(string)),
+                    new DataColumn("Logical Name", typeof(string)),
+                    new DataColumn("Display Name", typeof(string)),
                     new DataColumn("Required", typeof(string)),
-                    new DataColumn("DataType", typeof(string)),
-                    new DataColumn("MetaData", typeof(string))
+                    new DataColumn("Data Type", typeof(string)),
+                    new DataColumn("Metadata", typeof(string))
                     });
                 Data.PrimaryKey = new DataColumn[] { Data.Columns["Key"] };
 
@@ -187,13 +221,14 @@ namespace CRMViewerPlugin
                 string primaryKey = EntityLogicalName + "id";
                 foreach (AttributeMetadata am in response.EntityMetadata.Attributes)
                 {
-                    if (am.DisplayName.LocalizedLabels.Count > 0)
+                    if (am.DisplayName.LocalizedLabels.Count > 0 &&
+                        (ShowDefaultAttributes || (!defaultAttributes.Contains(am.LogicalName))))
                     {
                         DataRow newDR = Data.NewRow();
                         newDR["Key"] = am.LogicalName;
-                        newDR["DisplayName"] = am.DisplayName.LocalizedLabels[0].Label;
-                        newDR["LogicalName"] = am.LogicalName;
-                        newDR["DataType"] = am.AttributeType.ToString();
+                        newDR["Display Name"] = am.DisplayName.LocalizedLabels[0].Label;
+                        newDR["Logical Name"] = am.LogicalName;
+                        newDR["Data Type"] = am.AttributeType.ToString();
                         switch (am.RequiredLevel.Value)
                         {
                             case AttributeRequiredLevel.None: newDR["Required"] = string.Empty; break;
@@ -214,7 +249,7 @@ namespace CRMViewerPlugin
                                     RetrieveAsIfPublished = true
                                 };
                                 RetrieveAttributeResponse rarr = (RetrieveAttributeResponse)service.Execute(rar);
-                                newDR["MetaData"] = string.Join(", ", ((LookupAttributeMetadata)rarr.AttributeMetadata).Targets);
+                                newDR["Metadata"] = string.Join(", ", ((LookupAttributeMetadata)rarr.AttributeMetadata).Targets);
                                 break;
 
                             case "Picklist":
@@ -225,11 +260,11 @@ namespace CRMViewerPlugin
                                     RetrieveAsIfPublished = true
                                 };
                                 RetrieveAttributeResponse rarplr = (RetrieveAttributeResponse)service.Execute(rarpl);
-                                newDR["MetaData"] = ((PicklistAttributeMetadata)rarplr.AttributeMetadata).OptionSet.Name;
+                                newDR["Metadata"] = ((PicklistAttributeMetadata)rarplr.AttributeMetadata).OptionSet.Name;
                                 break;
 
                             default:
-                                newDR["MetaData"] = string.Empty;
+                                newDR["Metadata"] = string.Empty;
                                 break;
                         }
                         Data.Rows.Add(newDR);
@@ -330,7 +365,7 @@ namespace CRMViewerPlugin
             Data.DefaultView.Sort = "Value ASC";
         }
 
-        internal void LoadRecord(string entityLogicalName, Guid recordId, BackgroundWorker worker)
+        internal void LoadRecord(string entityLogicalName, Guid recordId, bool customOnly, BackgroundWorker worker)
         {
             this.EntityLogicalName = entityLogicalName;
             this.currentSelectionType = SelectionType.Record;
@@ -343,8 +378,10 @@ namespace CRMViewerPlugin
                     new DataColumn("Logical Name", typeof(string)),
                     new DataColumn("Display Name", typeof(string)),
                     new DataColumn("Data Type", typeof(string)),
-                    new DataColumn("Value", typeof(string))
-                }) ;
+                    new DataColumn("Value", typeof(string)),
+                    new DataColumn("Metadata", typeof(string)),
+                });
+            Data.PrimaryKey = new DataColumn[] { Data.Columns["Key"] };
 
             string fetchXml = null;
 
@@ -380,7 +417,7 @@ namespace CRMViewerPlugin
                 Entity entity = ec[0];
                 this.EntityRecordId = entity.Id;
                 Browser entityResult = new Browser(service);
-                entityResult.LoadEntityAttributes(entityLogicalName, worker);
+                entityResult.LoadEntityAttributes(entityLogicalName, customOnly, worker);
 
                 //////// do sorting
 
@@ -393,6 +430,43 @@ namespace CRMViewerPlugin
                     dr[3] = edr[4];
                     if (entity.Contains((string)edr[1]))
                         dr[4] = EntityValueFormat(entity, (string)edr[1]);
+
+
+
+
+                    switch (edr[4].ToString())
+                    {
+                        case "Lookup":
+                            RetrieveAttributeRequest rar = new RetrieveAttributeRequest()
+                            {
+                                EntityLogicalName = EntityLogicalName,
+                                LogicalName = edr[0].ToString(),
+                                RetrieveAsIfPublished = true
+                            };
+                            RetrieveAttributeResponse rarr = (RetrieveAttributeResponse)service.Execute(rar);
+                            dr["Metadata"] = string.Join(", ", ((LookupAttributeMetadata)rarr.AttributeMetadata).Targets);
+                            break;
+
+                        case "Picklist":
+                            RetrieveAttributeRequest rarpl = new RetrieveAttributeRequest()
+                            {
+                                EntityLogicalName = EntityLogicalName,
+                                LogicalName = edr[0].ToString(),
+                                RetrieveAsIfPublished = true
+                            };
+                            RetrieveAttributeResponse rarplr = (RetrieveAttributeResponse)service.Execute(rarpl);
+                            dr["Metadata"] = ((PicklistAttributeMetadata)rarplr.AttributeMetadata).OptionSet.Name;
+                            break;
+
+                        default:
+                            dr["Metadata"] = string.Empty;
+                            break;
+                    }
+
+
+
+
+
                     //else
                     //  dr[2] = "<NULL>";
                     Data.Rows.Add(dr);
@@ -400,34 +474,39 @@ namespace CRMViewerPlugin
             }
         }
 
-        public override Result ProcessSelection(object selection, System.ComponentModel.BackgroundWorker worker)
+        public override Result ProcessSelection(object sender, object selection, System.ComponentModel.BackgroundWorker worker)
         {
             Browser retVal = null;
             DataRow dataRow = Data.Rows.Find(selection);
+
 
             switch (currentSelectionType)
             {
                 case SelectionType.EntityList:
                     retVal = new Browser(service);
                     retVal.EntityLogicalName = EntityLogicalName;
-                    retVal.LoadEntityAttributes((string)selection, worker);
+                    retVal.control = (ctlCRMViewer)sender;
+                    retVal.LoadEntityAttributes((string)selection, ShowDefaultAttributes, worker);
                     break;
 
                 case SelectionType.Entity:
+                case SelectionType.Record:
                     string entityLogicalName = (string)selection;
-                    string dataType = (string)dataRow["DataType"];
+                    string dataType = (string)dataRow["Data Type"];
                     if (dataType == "Lookup")
                     {
                         retVal = new Browser(service);
                         retVal.EntityLogicalName = EntityLogicalName;
-                        retVal.LoadEntityAttributes((string)dataRow["MetaData"], worker);
+                        retVal.control = (ctlCRMViewer)sender;
+                        retVal.LoadEntityAttributes((string)dataRow["Metadata"], ShowDefaultAttributes, worker);
                     }
                     else if (dataType == "Picklist")
                     {
                         retVal = new Browser(service);
                         retVal.EntityLogicalName = EntityLogicalName;
-                        string logicalName = (string)dataRow["LogicalName"];
-                        string listName = (string)dataRow["MetaData"];
+                        retVal.control = (ctlCRMViewer)sender;
+                        string logicalName = (string)dataRow["Logical Name"];
+                        string listName = (string)dataRow["Metadata"];
                         retVal.LoadPicklist(EntityLogicalName, logicalName);
                     }
                     break;
@@ -446,8 +525,9 @@ namespace CRMViewerPlugin
             switch (currentSelectionType)
             {
                 case SelectionType.EntityList: LoadEntitiesList(worker); break;
-                case SelectionType.Entity: LoadEntityAttributes(EntityLogicalName, worker); break;
+                case SelectionType.Entity: LoadEntityAttributes(EntityLogicalName, ShowDefaultAttributes, worker); break;
                 case SelectionType.PickList: LoadPicklist(EntityLogicalName, PicklistLogicalName); break;
+                case SelectionType.Record: LoadRecord(EntityLogicalName, EntityRecordId, ShowDefaultAttributes, worker); break;
                 default:
                     break;
             }

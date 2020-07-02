@@ -21,7 +21,7 @@ namespace CRMViewerPlugin
         }
 
         public abstract string Header { get; }
-        public abstract Result ProcessSelection(object selection, System.ComponentModel.BackgroundWorker worker);
+        public abstract Result ProcessSelection(object sender, object selection, System.ComponentModel.BackgroundWorker worker);
         public abstract void Refresh(System.ComponentModel.BackgroundWorker worker);
 
         public abstract string Status { get;  }

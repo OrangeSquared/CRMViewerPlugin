@@ -15,5 +15,6 @@ namespace CRMViewerPlugin
     public class Settings
     {
         public string LastUsedOrganizationWebappUrl { get; set; }
+        public bool ShowDefaultAttributes { get; set; }
     }
 }
