@@ -54,7 +54,6 @@ namespace CRMViewerPlugin
             "utcconversiontimezonecode",
             "versionnumber",
             "statecode",
-            "statuscode",
         };
 
         public enum SelectionType
