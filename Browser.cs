@@ -493,21 +493,25 @@ namespace CRMViewerPlugin
                 case SelectionType.Record:
                     string entityLogicalName = (string)selection;
                     string dataType = (string)dataRow["Data Type"];
-                    if (dataType == "Lookup")
+                    switch (dataType)
                     {
-                        retVal = new Browser(service);
-                        retVal.EntityLogicalName = EntityLogicalName;
-                        retVal.control = (ctlCRMViewer)sender;
-                        retVal.LoadEntityAttributes((string)dataRow["Metadata"], ShowDefaultAttributes, worker);
-                    }
-                    else if (dataType == "Picklist")
-                    {
-                        retVal = new Browser(service);
-                        retVal.EntityLogicalName = EntityLogicalName;
-                        retVal.control = (ctlCRMViewer)sender;
-                        string logicalName = (string)dataRow["Logical Name"];
-                        string listName = (string)dataRow["Metadata"];
-                        retVal.LoadPicklist(EntityLogicalName, logicalName);
+                        case "Lookup":
+                            retVal = new Browser(service);
+                            retVal.EntityLogicalName = EntityLogicalName;
+                            retVal.control = (ctlCRMViewer)sender;
+                            retVal.LoadEntityAttributes((string)dataRow["Metadata"], ShowDefaultAttributes, worker);
+                            break;
+
+                        case "Picklist":
+                        case "State":
+                        case "Status":
+                            retVal = new Browser(service);
+                            retVal.EntityLogicalName = EntityLogicalName;
+                            retVal.control = (ctlCRMViewer)sender;
+                            string logicalName = (string)dataRow["Logical Name"];
+                            string listName = (string)dataRow["Metadata"];
+                            retVal.LoadPicklist(EntityLogicalName, logicalName);
+                            break;
                     }
                     break;
 
