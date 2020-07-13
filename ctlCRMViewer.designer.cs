@@ -33,6 +33,7 @@
             this.tsbBack = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.tsbOpenInBrowser = new System.Windows.Forms.ToolStripButton();
+            this.stbCustomFields = new System.Windows.Forms.ToolStripButton();
             this.tssSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.tslCached = new System.Windows.Forms.ToolStripLabel();
             this.tsbRefresh = new System.Windows.Forms.ToolStripButton();
@@ -46,7 +47,6 @@
             this.tssRecord = new System.Windows.Forms.ToolStripSeparator();
             this.gbMain = new System.Windows.Forms.GroupBox();
             this.dgvMain = new System.Windows.Forms.DataGridView();
-            this.stbCustomFields = new System.Windows.Forms.ToolStripButton();
             this.toolStripMenu.SuspendLayout();
             this.gbMain.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvMain)).BeginInit();
@@ -100,6 +100,16 @@
             this.tsbOpenInBrowser.Size = new System.Drawing.Size(98, 22);
             this.tsbOpenInBrowser.Text = "Open in Browser";
             this.tsbOpenInBrowser.Click += new System.EventHandler(this.tsbOpenInBrowser_Click);
+            // 
+            // stbCustomFields
+            // 
+            this.stbCustomFields.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.stbCustomFields.Image = ((System.Drawing.Image)(resources.GetObject("stbCustomFields.Image")));
+            this.stbCustomFields.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.stbCustomFields.Name = "stbCustomFields";
+            this.stbCustomFields.Size = new System.Drawing.Size(81, 22);
+            this.stbCustomFields.Text = "Show Default";
+            this.stbCustomFields.Click += new System.EventHandler(this.stbCustomFields_Click);
             // 
             // tssSeparator1
             // 
@@ -212,16 +222,6 @@
             this.dgvMain.TabIndex = 0;
             this.dgvMain.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvMain_CellDoubleClick);
             this.dgvMain.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dgvMain_KeyDown);
-            // 
-            // stbCustomFields
-            // 
-            this.stbCustomFields.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.stbCustomFields.Image = ((System.Drawing.Image)(resources.GetObject("stbCustomFields.Image")));
-            this.stbCustomFields.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.stbCustomFields.Name = "stbCustomFields";
-            this.stbCustomFields.Size = new System.Drawing.Size(81, 22);
-            this.stbCustomFields.Text = "Show Default";
-            this.stbCustomFields.Click += new System.EventHandler(this.stbCustomFields_Click);
             // 
             // ctlCRMViewer
             // 
