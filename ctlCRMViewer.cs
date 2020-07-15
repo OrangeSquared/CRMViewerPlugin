@@ -465,19 +465,27 @@ namespace CRMViewerPlugin
         {
             MenuItem miCopyAll = new MenuItem("Copy All");
             miCopyAll.Click += miCopyAll_Click;
+            MenuItem miCopyKey = new MenuItem("Copy Key");
+            miCopyKey.Click += miCopyKey_Click;
 
             if (e.Button == MouseButtons.Right)
             {
                 ContextMenu contextMenu = new ContextMenu(new MenuItem[]
                 {
-                    miCopyAll
+                    miCopyKey,
+                    miCopyAll,
                 });
                 MenuItem[] resultmis = results.Peek().GetContextMenu(dgvMain.SelectedRows[0].Cells[0].Value);
                 if (resultmis != null)
                     contextMenu.MenuItems.AddRange(resultmis);
-
+                
                 contextMenu.Show(dgvMain, e.Location);
             }
+        }
+
+        private void miCopyKey_Click(object sender, EventArgs e)
+        {
+            Clipboard.SetText(dgvMain.SelectedRows[0].Cells[1].Value.ToString());
         }
 
         private void miCopyAll_Click(object sender, EventArgs e)
