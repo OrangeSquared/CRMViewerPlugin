@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using XrmToolBox.Extensibility;
 
 namespace CRMViewerPlugin
@@ -30,5 +31,6 @@ namespace CRMViewerPlugin
 
         public string SearchText { get; set; }
 
+        public abstract MenuItem[] GetContextMenu(object selection);
     }
 }

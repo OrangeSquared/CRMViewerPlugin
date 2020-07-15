@@ -170,9 +170,11 @@
             // 
             // tstbRecordID
             // 
+            this.tstbRecordID.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.tstbRecordID.Name = "tstbRecordID";
             this.tstbRecordID.Size = new System.Drawing.Size(225, 25);
             this.tstbRecordID.Text = "00000000-0000-0000-0000-000000000000";
+            this.tstbRecordID.Enter += new System.EventHandler(this.tstbRecordID_Enter);
             // 
             // tsbLoadRecord
             // 
@@ -222,6 +224,7 @@
             this.dgvMain.TabIndex = 0;
             this.dgvMain.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvMain_CellDoubleClick);
             this.dgvMain.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dgvMain_KeyDown);
+            this.dgvMain.MouseDown += new System.Windows.Forms.MouseEventHandler(this.dgvMain_MouseDown);
             // 
             // ctlCRMViewer
             // 

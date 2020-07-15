@@ -14,7 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Services.Description;
-using System.Web.UI.WebControls;
+using System.Windows.Forms;
 using System.Xml;
 using XrmToolBox.Extensibility;
 
@@ -597,6 +597,41 @@ namespace CRMViewerPlugin
             Tuple<string, string, int, string> record = _optionSetValues.Find(x => (x.Item1 == Entity && x.Item2 == Attribute && x.Item3 == Value));
             return string.Format("({0}) {1}", record.Item3, record.Item4);
         }
+
+        public override System.Windows.Forms.MenuItem[] GetContextMenu(object selection)
+        {
+            switch (currentSelectionType)
+            {
+                case SelectionType.EntityList:
+                    return null;
+                    break;
+                case SelectionType.Entity:
+                    return null;
+                    break;
+                case SelectionType.PickList:
+                    MenuItem miMakeUnum = new MenuItem("Copy Enum");
+                    miMakeUnum.Click += miMakeUnum_Click;
+                    return new MenuItem[] { miMakeUnum };
+                    break;
+                case SelectionType.Record:
+                    return null;
+                    break;
+                default:
+                    return null;
+                    break;
+            }
+        }
+
+        private void miMakeUnum_Click(object sender, EventArgs e)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine(string.Format("enum {0}\r\n{{", PicklistLogicalName));
+            foreach (DataRow dr in Data.Rows)
+                sb.AppendLine(string.Format("\t{0} = {1},", dr["Label"].ToString().Replace(" ","_"), dr["value"]));
+            sb.AppendLine("}");
+            Clipboard.SetText(sb.ToString());
+        }
+
 
     }
 }

@@ -6,6 +6,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace CRMViewerPlugin
 {
@@ -23,6 +24,11 @@ namespace CRMViewerPlugin
         public override void Refresh(BackgroundWorker worker)
         {
             
+        }
+
+        public override MenuItem[] GetContextMenu(object selection)
+        {
+            return null;
         }
 
         public RecordNotFound()

@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Configuration;
+using System.Windows.Forms;
 
 namespace CRMViewerPlugin
 {
@@ -56,6 +57,11 @@ namespace CRMViewerPlugin
         public override void Refresh(BackgroundWorker worker)
         {
          
+        }
+
+        public override MenuItem[] GetContextMenu(object selection)
+        {
+            return null;
         }
     }
 }

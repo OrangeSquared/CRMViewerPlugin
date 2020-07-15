@@ -14,6 +14,7 @@ using McTools.Xrm.Connection;
 using System.Dynamic;
 using XrmToolBox.Extensibility.Interfaces;
 using XrmToolBox.Extensibility.Args;
+using System.Runtime.Remoting.Contexts;
 
 namespace CRMViewerPlugin
 {
@@ -201,19 +202,23 @@ namespace CRMViewerPlugin
         private void dgvMain_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;
-            var key = dgvMain.Rows[e.RowIndex].Cells["Key"].Value;
+            ProcessSelection(dgvMain.Rows[e.RowIndex].Cells["Key"].Value as string);
+        }
+
+        private void ProcessSelection(string key)
+        {
             int stackcount = results.Count;
 
             WorkAsyncInfo wai = new WorkAsyncInfo
             {
                 Message = "Retrieving info from CRM...",
                 Work = (worker, args) =>
-                  {
-                      Result result = results.Peek().ProcessSelection(this, key, worker);
+                {
+                    Result result = results.Peek().ProcessSelection(this, key, worker);
 
-                      if (result != null)
-                          results.Push(result);
-                  },
+                    if (result != null)
+                        results.Push(result);
+                },
                 ProgressChanged = ProgressChanged,
                 PostWorkCallBack = NewResultsAvailable,
                 AsyncArgument = null,
@@ -290,6 +295,9 @@ namespace CRMViewerPlugin
             if (e.KeyCode == Keys.Escape)
                 PageBack();
 
+            else if (e.KeyCode == Keys.Enter)
+                ProcessSelection(dgvMain.SelectedRows[0].Cells["Key"].Value as string);
+
             else if (e.KeyCode == Keys.F2)
                 tsbSearch.Focus();
 
@@ -335,6 +343,8 @@ namespace CRMViewerPlugin
                 SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs(string.Format("searching '{0}'", quickSearch)));
                 DoQuickSearch();
             }
+
+            e.SuppressKeyPress = true;
         }
 
         private void DoQuickSearch()
@@ -434,7 +444,7 @@ namespace CRMViewerPlugin
                 MessageWidth = 340
             };
             WorkAsync(wai);
-            
+
         }
 
         internal string SettingValue(string key)
@@ -444,6 +454,54 @@ namespace CRMViewerPlugin
                 case "showDefaultAttributes": return stbCustomFields.Checked ? "true" : "false"; break;
                 default: return ""; break;
             }
+        }
+
+        private void tstbRecordID_Enter(object sender, EventArgs e)
+        {
+            tstbRecordID.SelectAll();
+        }
+
+        private void dgvMain_MouseDown(object sender, MouseEventArgs e)
+        {
+            MenuItem miCopyAll = new MenuItem("Copy All");
+            miCopyAll.Click += miCopyAll_Click;
+
+            if (e.Button == MouseButtons.Right)
+            {
+                ContextMenu contextMenu = new ContextMenu(new MenuItem[]
+                {
+                    miCopyAll
+                });
+                MenuItem[] resultmis = results.Peek().GetContextMenu(dgvMain.SelectedRows[0].Cells[0].Value);
+                if (resultmis != null)
+                    contextMenu.MenuItems.AddRange(resultmis);
+
+                contextMenu.Show(dgvMain, e.Location);
+            }
+        }
+
+        private void miCopyAll_Click(object sender, EventArgs e)
+        {
+            DataTable dt = results.Peek().Data;
+            string[,] cb = new string[dt.Rows.Count, dt.Columns.Count - 1];
+            StringBuilder sb = new StringBuilder();
+
+            for (int row = 0; row < dt.Rows.Count; row++)
+            {
+                for (int col = 0; col < cb.GetUpperBound(1); col++)
+                    cb[row, col] = dt.Rows[row][col + 1].ToString();
+                object[] notfirstcolumn = new object[dt.Columns.Count - 1];
+                for (int i = 0; i <= notfirstcolumn.GetUpperBound(0); i++)
+                    notfirstcolumn[i] = dt.Rows[row].ItemArray[i + 1];
+                sb.Append(string.Join("\t", Array.ConvertAll<object, string>(notfirstcolumn, ConvertObjectToString)) + "\r\n");
+            }
+            //Clipboard.SetDataObject(cb);
+            Clipboard.SetText(sb.ToString());
+        }
+
+        private string ConvertObjectToString(object input)
+        {
+            return input?.ToString() ?? string.Empty;
         }
     }
 }
