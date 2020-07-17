@@ -598,7 +598,7 @@ namespace CRMViewerPlugin
             return string.Format("({0}) {1}", record.Item3, record.Item4);
         }
 
-        public override System.Windows.Forms.MenuItem[] GetContextMenu(object selection)
+        public override MenuItem[] GetContextMenu(object selection)
         {
             switch (currentSelectionType)
             {
@@ -606,7 +606,9 @@ namespace CRMViewerPlugin
                     return null;
                     break;
                 case SelectionType.Entity:
-                    return null;
+                    MenuItem miCreateClass = new MenuItem("C# Class");
+                    miCreateClass.Click += MiCreateClass_Click;
+                    return new MenuItem[] { miCreateClass };
                     break;
                 case SelectionType.PickList:
                     MenuItem miMakeUnum = new MenuItem("Copy Enum");
@@ -622,6 +624,81 @@ namespace CRMViewerPlugin
             }
         }
 
+        private void MiCreateClass_Click(object sender, EventArgs e)
+        {
+            StringBuilder header = new StringBuilder();
+            StringBuilder body = new StringBuilder();
+            header.Append(string.Format(@"using Microsoft.Xrm.Sdk;
+using System;
+
+namespace CHANGETHIS
+{{
+    public class {0}
+    {{
+", EntityLogicalName));
+
+            foreach (DataRow dr in Data.Rows)
+            {                
+                switch (dr["Data type"].ToString())
+                {
+                    case "String":
+                    case "Memo":
+                        body.AppendLine(string.Format("        public string {0} {{ get; set; }}", dr["Logical Name"].ToString()));
+                        break;
+
+                    case "Boolean":
+                        body.AppendLine(string.Format("        public bool {0} {{ get; set; }}", dr["Logical Name"].ToString()));
+                        break;
+
+                    case "DateTime":
+                        body.AppendLine(string.Format("        public DateTime {0} {{ get; set; }}", dr["Logical Name"].ToString()));
+                        break;
+
+                    case "Decimal":                        
+                        body.AppendLine(string.Format("        public decimal {0} {{ get; set; }}", dr["Logical Name"].ToString()));
+                        break;
+
+                    case "Double":
+                        body.AppendLine(string.Format("        public double {0} {{ get; set; }}", dr["Logical Name"].ToString()));
+                        break;
+
+                    case "Integer":
+                        body.AppendLine(string.Format("        public int {0} {{ get; set; }}", dr["Logical Name"].ToString()));
+                        break;
+
+                    case "Money":
+                        body.AppendLine(string.Format("        public Money {0} {{ get; set; }}", dr["Logical Name"].ToString()));
+                        break;
+
+                    case "UniqueIdentifier":
+                        body.AppendLine(string.Format("        public Guid {0} {{ get; set; }}", dr["Logical Name"].ToString()));
+                        break;
+
+                    case "Picklist":
+                    case "State":
+                    case "Status":
+                        header.AppendLine(UnimFromPicklist(dr["Logical Name"].ToString()));
+                        body.AppendLine(string.Format("        public {0}Values {0} {{ get; set; }}", dr["Logical Name"].ToString()));
+                        break;
+
+                    case "Lookup":
+                        body.AppendLine(string.Format("        public EntityReference {0} {{ get; set; }}", dr["Logical Name"].ToString()));
+                        break;
+
+                    default:
+                        break;
+                }
+                //new DataColumn("Logical Name", typeof(string)),
+                //    new DataColumn("Display Name", typeof(string)),
+                //    new DataColumn("Required", typeof(string)),
+                //    new DataColumn("Data Type", typeof(string)),
+                //    new DataColumn("Metadata", typeof(string))
+            }
+
+            body.Append("}\r\n}");
+            Clipboard.SetText(header.ToString() + body.ToString());
+        }
+
         private void miMakeUnum_Click(object sender, EventArgs e)
         {
             StringBuilder sb = new StringBuilder();
@@ -632,6 +709,33 @@ namespace CRMViewerPlugin
             Clipboard.SetText(sb.ToString());
         }
 
+        private string UnimFromPicklist(string AttributeName)
+        {
+            RetrieveAttributeRequest rar = new RetrieveAttributeRequest()
+            {
+                EntityLogicalName = EntityLogicalName,
+                LogicalName = AttributeName,
+                RetrieveAsIfPublished = true
+            };
+            RetrieveAttributeResponse rarr = (RetrieveAttributeResponse)service.Execute(rar);
 
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine(string.Format("public enum {0}Values\r\n{{", AttributeName));
+
+            if (rarr.AttributeMetadata.GetType().Name == "PicklistAttributeMetadata")
+                foreach (OptionMetadata om in ((PicklistAttributeMetadata)rarr.AttributeMetadata).OptionSet.Options)
+                    sb.AppendLine(string.Format("\t{0} = {1},", om.Label.LocalizedLabels[0].Label.Replace(" ", "_"), om.Value ?? 0));
+
+            else if (rarr.AttributeMetadata.GetType().Name == "StateAttributeMetadata")
+                foreach (OptionMetadata om in ((StateAttributeMetadata)rarr.AttributeMetadata).OptionSet.Options)
+                    sb.AppendLine(string.Format("\t{0} = {1},", om.Label.LocalizedLabels[0].Label.Replace(" ", "_"), om.Value ?? 0));
+
+            else if (rarr.AttributeMetadata.GetType().Name == "StatusAttributeMetadata")
+                foreach (OptionMetadata om in ((StatusAttributeMetadata)rarr.AttributeMetadata).OptionSet.Options)
+                    sb.AppendLine(string.Format("\t{0} = {1},", om.Label.LocalizedLabels[0].Label.Replace(" ", "_"), om.Value ?? 0));
+
+            sb.AppendLine("}");
+            return sb.ToString();
+        }
     }
 }
