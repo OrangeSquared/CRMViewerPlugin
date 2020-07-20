@@ -638,51 +638,51 @@ namespace CHANGETHIS
 ", EntityLogicalName));
 
             foreach (DataRow dr in Data.Rows)
-            {                
+            {
                 switch (dr["Data type"].ToString())
                 {
                     case "String":
                     case "Memo":
-                        body.AppendLine(string.Format("        public string {0} {{ get; set; }}", dr["Logical Name"].ToString()));
+                        body.AppendLine(string.Format("        public string {0} {{ get; set; }}", CleanVariableName(dr["Logical Name"].ToString())));
                         break;
 
                     case "Boolean":
-                        body.AppendLine(string.Format("        public bool {0} {{ get; set; }}", dr["Logical Name"].ToString()));
+                        body.AppendLine(string.Format("        public bool {0} {{ get; set; }}", CleanVariableName(dr["Logical Name"].ToString())));
                         break;
 
                     case "DateTime":
-                        body.AppendLine(string.Format("        public DateTime {0} {{ get; set; }}", dr["Logical Name"].ToString()));
+                        body.AppendLine(string.Format("        public DateTime {0} {{ get; set; }}", CleanVariableName(dr["Logical Name"].ToString())));
                         break;
 
-                    case "Decimal":                        
-                        body.AppendLine(string.Format("        public decimal {0} {{ get; set; }}", dr["Logical Name"].ToString()));
+                    case "Decimal":
+                        body.AppendLine(string.Format("        public decimal {0} {{ get; set; }}", CleanVariableName(dr["Logical Name"].ToString())));
                         break;
 
                     case "Double":
-                        body.AppendLine(string.Format("        public double {0} {{ get; set; }}", dr["Logical Name"].ToString()));
+                        body.AppendLine(string.Format("        public double {0} {{ get; set; }}", CleanVariableName(dr["Logical Name"].ToString())));
                         break;
 
                     case "Integer":
-                        body.AppendLine(string.Format("        public int {0} {{ get; set; }}", dr["Logical Name"].ToString()));
+                        body.AppendLine(string.Format("        public int {0} {{ get; set; }}", CleanVariableName(dr["Logical Name"].ToString())));
                         break;
-                        
+
                     case "Money":
-                        body.AppendLine(string.Format("        public Money {0} {{ get; set; }}", dr["Logical Name"].ToString()));
+                        body.AppendLine(string.Format("        public Money {0} {{ get; set; }}", CleanVariableName(dr["Logical Name"].ToString())));
                         break;
 
                     case "UniqueIdentifier":
-                        body.AppendLine(string.Format("        public Guid {0} {{ get; set; }}", dr["Logical Name"].ToString()));
+                        body.AppendLine(string.Format("        public Guid {0} {{ get; set; }}", CleanVariableName(dr["Logical Name"].ToString())));
                         break;
 
                     case "Picklist":
                     case "State":
                     case "Status":
                         header.AppendLine(UnimFromPicklist(dr["Logical Name"].ToString()));
-                        body.AppendLine(string.Format("        public {0}Values {0} {{ get; set; }}", dr["Logical Name"].ToString()));
+                        body.AppendLine(string.Format("        public {0}Values {0} {{ get; set; }}", CleanVariableName(dr["Logical Name"].ToString())));
                         break;
 
                     case "Lookup":
-                        body.AppendLine(string.Format("        public EntityReference {0} {{ get; set; }}", dr["Logical Name"].ToString()));
+                        body.AppendLine(string.Format("        public EntityReference {0} {{ get; set; }}", CleanVariableName(dr["Logical Name"].ToString())));
                         break;
 
                     default:
@@ -704,7 +704,9 @@ namespace CHANGETHIS
             StringBuilder sb = new StringBuilder();
             sb.AppendLine(string.Format("enum {0}\r\n{{", PicklistLogicalName));
             foreach (DataRow dr in Data.Rows)
-                sb.AppendLine(string.Format("\t{0} = {1},", dr["Label"].ToString().Replace(" ","_"), dr["value"]));
+                sb.AppendLine(string.Format("\t{0} = {1},",
+                   CleanVariableName(dr["Label"].ToString()),
+                    dr["value"]));
             sb.AppendLine("}");
             Clipboard.SetText(sb.ToString());
         }
@@ -724,18 +726,44 @@ namespace CHANGETHIS
 
             if (rarr.AttributeMetadata.GetType().Name == "PicklistAttributeMetadata")
                 foreach (OptionMetadata om in ((PicklistAttributeMetadata)rarr.AttributeMetadata).OptionSet.Options)
-                    sb.AppendLine(string.Format("\t{0} = {1},", om.Label.LocalizedLabels[0].Label.Replace(" ", "_"), om.Value ?? 0));
+                    sb.AppendLine(string.Format("\t{0} = {1},", CleanVariableName(om.Label.LocalizedLabels[0].Label), om.Value ?? 0));
 
             else if (rarr.AttributeMetadata.GetType().Name == "StateAttributeMetadata")
                 foreach (OptionMetadata om in ((StateAttributeMetadata)rarr.AttributeMetadata).OptionSet.Options)
-                    sb.AppendLine(string.Format("\t{0} = {1},", om.Label.LocalizedLabels[0].Label.Replace(" ", "_"), om.Value ?? 0));
+                    sb.AppendLine(string.Format("\t{0} = {1},", CleanVariableName(om.Label.LocalizedLabels[0].Label), om.Value ?? 0));
 
             else if (rarr.AttributeMetadata.GetType().Name == "StatusAttributeMetadata")
                 foreach (OptionMetadata om in ((StatusAttributeMetadata)rarr.AttributeMetadata).OptionSet.Options)
-                    sb.AppendLine(string.Format("\t{0} = {1},", om.Label.LocalizedLabels[0].Label.Replace(" ", "_"), om.Value ?? 0));
+                    sb.AppendLine(string.Format("\t{0} = {1},", CleanVariableName(om.Label.LocalizedLabels[0].Label), om.Value ?? 0));
 
             sb.AppendLine("}");
             return sb.ToString();
+        }
+        private string CleanVariableName(string Value)
+        {
+            string retVal = Value.Replace(" ", "_")
+                    .Replace(@"/", "_")
+                    .Replace(@"'", "_")
+                    .Replace(".", "_")
+                    .Replace("%", "_")
+                    .Replace("#", "_")
+                    .Replace(",", "_")
+                    .Replace("&", "_")
+                    .Replace("$", "_")
+                    .Replace("+", "")
+                    .Replace("(", "")
+                    .Replace(")", "")
+                    .Replace("amp;", "")
+                    .Replace(" ", "")
+                    .Replace(":", "")
+                    .Replace("�", "")
+                    .Replace("–", "")
+                    .Replace("-", "_");
+
+            if ("0123456789".Contains(retVal.Substring(0, 1)))
+                retVal = "_" + retVal;
+
+            return retVal;
         }
     }
 }
