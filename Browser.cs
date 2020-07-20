@@ -665,7 +665,7 @@ namespace CHANGETHIS
                     case "Integer":
                         body.AppendLine(string.Format("        public int {0} {{ get; set; }}", dr["Logical Name"].ToString()));
                         break;
-
+                        
                     case "Money":
                         body.AppendLine(string.Format("        public Money {0} {{ get; set; }}", dr["Logical Name"].ToString()));
                         break;

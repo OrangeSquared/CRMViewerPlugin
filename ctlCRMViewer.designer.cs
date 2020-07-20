@@ -170,7 +170,6 @@
             // 
             // tstbRecordID
             // 
-            this.tstbRecordID.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.tstbRecordID.Name = "tstbRecordID";
             this.tstbRecordID.Size = new System.Drawing.Size(225, 25);
             this.tstbRecordID.Text = "00000000-0000-0000-0000-000000000000";
