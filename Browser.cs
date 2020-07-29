@@ -279,29 +279,33 @@ namespace CRMViewerPlugin
             Data.DefaultView.Sort = "Key ASC";
         }
 
-        internal void OpenInBrowser()
+        internal static void OpenInBrowser(IOrganizationService service, SelectionType selectionType, string logicalname, Guid? recordId)
         {
             string rootURI = string.Format("https://{0}:{1}",
                 ((Microsoft.Xrm.Tooling.Connector.CrmServiceClient)service).CrmConnectOrgUriActual.Host,
                 ((Microsoft.Xrm.Tooling.Connector.CrmServiceClient)service).CrmConnectOrgUriActual.Port);
             string targetUri = null;
-            switch (currentSelectionType)
+
+            switch (selectionType)
             {
                 case SelectionType.EntityList:
                     targetUri = rootURI;
                     break;
                 case SelectionType.Entity:
-                    targetUri = string.Format("{0}//main.aspx?etn={1}&pagetype=entitylist", rootURI, EntityLogicalName);
+                    targetUri = string.Format("{0}//main.aspx?etn={1}&pagetype=entitylist", rootURI, logicalname);
                     break;
-                case SelectionType.Record: //              FUTURE
-                    targetUri = string.Format("{0}//main.aspx?etn={1}&pagetype=entityrecord&id={2}", rootURI, EntityLogicalName, EntityRecordId);
+                case SelectionType.Record:
+                    targetUri = string.Format("{0}//main.aspx?etn={1}&pagetype=entityrecord&id={2}", rootURI, logicalname, recordId);
                     break;
 
                 default:
                     break;
             }
             System.Diagnostics.Process.Start(targetUri);
+
         }
+
+        internal void OpenInBrowser() { Browser.OpenInBrowser(service, currentSelectionType, EntityLogicalName, EntityRecordId); }
 
         private void LoadPicklist(string entityLogicalName, string logicalName)
         {
@@ -600,28 +604,48 @@ namespace CRMViewerPlugin
 
         public override MenuItem[] GetContextMenu(object selection)
         {
+            MenuItem miOpenEntityInBrowser;
+
             switch (currentSelectionType)
             {
                 case SelectionType.EntityList:
-                    return null;
+                    miOpenEntityInBrowser = new MenuItem("Open In Browser");
+                    miOpenEntityInBrowser.Click += MiOpenEntityInBrowser_Click;
+                    return new MenuItem[] { miOpenEntityInBrowser };
                     break;
+
                 case SelectionType.Entity:
+                    miOpenEntityInBrowser = new MenuItem(string.Format("Open {0} In Browser", EntityLogicalName));
+                    miOpenEntityInBrowser.Click += MiOpenEntityInBrowser_Click;
+
                     MenuItem miCreateClass = new MenuItem("C# Class");
-                    miCreateClass.Click += MiCreateClass_Click;
-                    return new MenuItem[] { miCreateClass };
+                    miCreateClass.Click += MiCreateClass_Click;                    
+
+                    return new MenuItem[] { miOpenEntityInBrowser, miCreateClass };
                     break;
+
                 case SelectionType.PickList:
                     MenuItem miMakeUnum = new MenuItem("Copy Enum");
                     miMakeUnum.Click += miMakeUnum_Click;
                     return new MenuItem[] { miMakeUnum };
                     break;
+
                 case SelectionType.Record:
                     return null;
                     break;
+
                 default:
                     return null;
                     break;
             }
+        }
+
+        private void MiOpenEntityInBrowser_Click(object sender, EventArgs e)
+        {
+            if (currentSelectionType == SelectionType.EntityList)
+                Browser.OpenInBrowser(service, SelectionType.Entity, ((MenuItem)sender).Tag as string, null);
+            else if (currentSelectionType == SelectionType.Entity)
+                Browser.OpenInBrowser(service, SelectionType.Entity, EntityLogicalName, null);
         }
 
         private void MiCreateClass_Click(object sender, EventArgs e)
@@ -757,6 +781,7 @@ namespace CHANGETHIS
                     .Replace(" ", "")
                     .Replace(":", "")
                     .Replace("�", "")
+                    .Replace("’", "")
                     .Replace("–", "")
                     .Replace("-", "_");
 
