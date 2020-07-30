@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ctlCRMViewer));
             this.toolStripMenu = new System.Windows.Forms.ToolStrip();
             this.tsbBack = new System.Windows.Forms.ToolStripButton();
@@ -41,16 +42,17 @@
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.gbMain = new System.Windows.Forms.GroupBox();
-            this.dgvMain = new System.Windows.Forms.DataGridView();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.dgvMain = new System.Windows.Forms.DataGridView();
             this.dgvRelationships = new System.Windows.Forms.DataGridView();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.toolStripMenu.SuspendLayout();
             this.gbMain.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvMain)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvMain)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvRelationships)).BeginInit();
             this.SuspendLayout();
             // 
@@ -73,7 +75,6 @@
             this.toolStripMenu.Size = new System.Drawing.Size(1128, 25);
             this.toolStripMenu.TabIndex = 4;
             this.toolStripMenu.Text = "toolStrip1";
-            this.toolStripMenu.KeyDown += new System.Windows.Forms.KeyEventHandler(this.toolStripMenu_KeyDown);
             // 
             // tsbBack
             // 
@@ -96,7 +97,6 @@
             this.stbCustomFields.Name = "stbCustomFields";
             this.stbCustomFields.Size = new System.Drawing.Size(81, 22);
             this.stbCustomFields.Text = "Show Default";
-            this.stbCustomFields.Click += new System.EventHandler(this.stbCustomFields_Click);
             // 
             // tssSeparator1
             // 
@@ -162,26 +162,6 @@
             this.gbMain.TabStop = false;
             this.gbMain.Text = "gbMain";
             // 
-            // dgvMain
-            // 
-            this.dgvMain.AllowUserToAddRows = false;
-            this.dgvMain.AllowUserToDeleteRows = false;
-            this.dgvMain.AllowUserToResizeRows = false;
-            this.dgvMain.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
-            this.dgvMain.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvMain.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvMain.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
-            this.dgvMain.Location = new System.Drawing.Point(0, 0);
-            this.dgvMain.MultiSelect = false;
-            this.dgvMain.Name = "dgvMain";
-            this.dgvMain.ReadOnly = true;
-            this.dgvMain.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvMain.Size = new System.Drawing.Size(574, 386);
-            this.dgvMain.TabIndex = 0;
-            this.dgvMain.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvMain_CellDoubleClick);
-            this.dgvMain.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dgvMain_KeyDown);
-            this.dgvMain.MouseDown += new System.Windows.Forms.MouseEventHandler(this.dgvMain_MouseDown);
-            // 
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -198,6 +178,26 @@
             this.splitContainer1.Size = new System.Drawing.Size(1116, 386);
             this.splitContainer1.SplitterDistance = 574;
             this.splitContainer1.TabIndex = 1;
+            // 
+            // dgvMain
+            // 
+            this.dgvMain.AllowUserToAddRows = false;
+            this.dgvMain.AllowUserToDeleteRows = false;
+            this.dgvMain.AllowUserToResizeRows = false;
+            this.dgvMain.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
+            this.dgvMain.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
+            this.dgvMain.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvMain.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgvMain.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
+            this.dgvMain.Location = new System.Drawing.Point(0, 0);
+            this.dgvMain.MultiSelect = false;
+            this.dgvMain.Name = "dgvMain";
+            this.dgvMain.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.dgvMain.Size = new System.Drawing.Size(574, 386);
+            this.dgvMain.TabIndex = 0;
+            this.dgvMain.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvMain_CellDoubleClick);
+            this.dgvMain.CellMouseDown += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dgvMain_CellMouseDown);
+            this.dgvMain.CellMouseUp += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dgvMain_CellMouseUp);
             // 
             // dgvRelationships
             // 
@@ -216,6 +216,11 @@
             this.dgvRelationships.Size = new System.Drawing.Size(538, 386);
             this.dgvRelationships.TabIndex = 1;
             // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
+            // 
             // ctlCRMViewer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -224,15 +229,16 @@
             this.Controls.Add(this.toolStripMenu);
             this.Name = "ctlCRMViewer";
             this.Size = new System.Drawing.Size(1128, 436);
+            this.OnCloseTool += new System.EventHandler(this.MyPluginControl_OnCloseTool);
             this.Load += new System.EventHandler(this.MyPluginControl_Load);
             this.toolStripMenu.ResumeLayout(false);
             this.toolStripMenu.PerformLayout();
             this.gbMain.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.dgvMain)).EndInit();
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dgvMain)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvRelationships)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -255,5 +261,6 @@
         private System.Windows.Forms.ToolStripButton stbCustomFields;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.DataGridView dgvRelationships;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
     }
 }
