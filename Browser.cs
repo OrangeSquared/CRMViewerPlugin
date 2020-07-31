@@ -273,6 +273,74 @@ namespace CRMViewerPlugin
             memoryStream.Dispose();
         }
 
+
+        internal static Result GetPicklistResult(IOrganizationService service, string entityLogicalName, string attributeLogicalName, BackgroundWorker worker)
+        {
+            Result retVal = new Result();
+            retVal.DataType = Result.ResultType.PickList;
+            retVal.Key = attributeLogicalName;
+
+            retVal.Data = new DataSet();
+            DataTable Data = new DataTable();
+            retVal.Data.Tables.Add(Data);
+
+            Data.Columns.AddRange(
+                new DataColumn[] {
+                            new DataColumn("Key", typeof(string)),
+                            new DataColumn("Value", typeof(string)),
+                            new DataColumn("Label", typeof(string)),
+                });
+            Data.PrimaryKey = new DataColumn[] { Data.Columns["Key"] };
+            //need to detmine global or local
+
+            RetrieveAttributeRequest rar = new RetrieveAttributeRequest()
+            {
+                EntityLogicalName = entityLogicalName,
+                LogicalName = attributeLogicalName,
+                RetrieveAsIfPublished = true
+            };
+            RetrieveAttributeResponse rarr = (RetrieveAttributeResponse)service.Execute(rar);
+
+
+            retVal.Header= string.Format("PickList {0}", attributeLogicalName);
+
+
+            if (rarr.AttributeMetadata.GetType().Name == "PicklistAttributeMetadata")
+                foreach (OptionMetadata om in ((PicklistAttributeMetadata)rarr.AttributeMetadata).OptionSet.Options)
+                {
+                    DataRow dr = Data.NewRow();
+                    dr["Key"] = om.Value ?? 0;
+                    dr["Value"] = om.Value ?? 0;
+                    dr["Label"] = om.Label.LocalizedLabels[0].Label;
+                    Data.Rows.Add(dr);
+                }
+
+            else if (rarr.AttributeMetadata.GetType().Name == "StateAttributeMetadata")
+                foreach (OptionMetadata om in ((StateAttributeMetadata)rarr.AttributeMetadata).OptionSet.Options)
+                {
+                    DataRow dr = Data.NewRow();
+                    dr["Key"] = om.Value ?? 0;
+                    dr["Value"] = om.Value ?? 0;
+                    dr["Label"] = om.Label.LocalizedLabels[0].Label;
+                    Data.Rows.Add(dr);
+                }
+
+            else if (rarr.AttributeMetadata.GetType().Name == "StatusAttributeMetadata")
+                foreach (OptionMetadata om in ((StatusAttributeMetadata)rarr.AttributeMetadata).OptionSet.Options)
+                {
+                    DataRow dr = Data.NewRow();
+                    dr["Key"] = om.Value ?? 0;
+                    dr["Value"] = om.Value ?? 0;
+                    dr["Label"] = om.Label.LocalizedLabels[0].Label;
+                    Data.Rows.Add(dr);
+                }
+
+            Data.DefaultView.Sort = "Value ASC";
+
+            return retVal;
+        }
+
+
         //    SettingsManager.Instance.Save(GetType(), output.ToArray(), ((Microsoft.Xrm.Tooling.Connector.CrmServiceClient)service).ConnectedOrgUniqueName + "_cache");
         //}
 
@@ -308,94 +376,7 @@ namespace CRMViewerPlugin
 
 
 
-        //        internal static void OpenInBrowser(IOrganizationService service, SelectionType selectionType, string logicalname, Guid? recordId)
-        //        {
-        //            string rootURI = string.Format("https://{0}:{1}",
-        //                ((Microsoft.Xrm.Tooling.Connector.CrmServiceClient)service).CrmConnectOrgUriActual.Host,
-        //                ((Microsoft.Xrm.Tooling.Connector.CrmServiceClient)service).CrmConnectOrgUriActual.Port);
-        //            string targetUri = null;
 
-        //            switch (selectionType)
-        //            {
-        //                case SelectionType.EntityList:
-        //                    targetUri = rootURI;
-        //                    break;
-        //                case SelectionType.Entity:
-        //                    targetUri = string.Format("{0}//main.aspx?etn={1}&pagetype=entitylist", rootURI, logicalname);
-        //                    break;
-        //                case SelectionType.Record:
-        //                    targetUri = string.Format("{0}//main.aspx?etn={1}&pagetype=entityrecord&id={2}", rootURI, logicalname, recordId);
-        //                    break;
-
-        //                default:
-        //                    break;
-        //            }
-        //            System.Diagnostics.Process.Start(targetUri);
-
-        //        }
-
-        //        internal void OpenInBrowser() { Browser.OpenInBrowser(service, currentSelectionType, EntityLogicalName, EntityRecordId); }
-
-        //        private void LoadPicklist(string entityLogicalName, string logicalName)
-        //        {
-        //            currentSelectionType = SelectionType.PickList;
-        //            PicklistLogicalName = logicalName;
-
-        //            Data = new DataTable();
-        //            Data.Columns.AddRange(
-        //                new DataColumn[] {
-        //                    new DataColumn("Key", typeof(string)),
-        //                    new DataColumn("Value", typeof(string)),
-        //                    new DataColumn("Label", typeof(string)),
-        //                });
-        //            Data.PrimaryKey = new DataColumn[] { Data.Columns["Key"] };
-        //            //need to detmine global or local
-
-        //            RetrieveAttributeRequest rar = new RetrieveAttributeRequest()
-        //            {
-        //                EntityLogicalName = EntityLogicalName,
-        //                LogicalName = logicalName,
-        //                RetrieveAsIfPublished = true
-        //            };
-        //            RetrieveAttributeResponse rarr = (RetrieveAttributeResponse)service.Execute(rar);
-
-
-        //            EntityLogicalName = entityLogicalName;
-        //            currentSelection = string.Format("PickList {0}", logicalName);
-
-
-        //            if (rarr.AttributeMetadata.GetType().Name == "PicklistAttributeMetadata")
-        //                foreach (OptionMetadata om in ((PicklistAttributeMetadata)rarr.AttributeMetadata).OptionSet.Options)
-        //                {
-        //                    DataRow dr = Data.NewRow();
-        //                    dr["Key"] = om.Value ?? 0;
-        //                    dr["Value"] = om.Value ?? 0;
-        //                    dr["Label"] = om.Label.LocalizedLabels[0].Label;
-        //                    Data.Rows.Add(dr);
-        //                }
-
-        //            else if (rarr.AttributeMetadata.GetType().Name == "StateAttributeMetadata")
-        //                foreach (OptionMetadata om in ((StateAttributeMetadata)rarr.AttributeMetadata).OptionSet.Options)
-        //                {
-        //                    DataRow dr = Data.NewRow();
-        //                    dr["Key"] = om.Value ?? 0;
-        //                    dr["Value"] = om.Value ?? 0;
-        //                    dr["Label"] = om.Label.LocalizedLabels[0].Label;
-        //                    Data.Rows.Add(dr);
-        //                }
-
-        //            else if (rarr.AttributeMetadata.GetType().Name == "StatusAttributeMetadata")
-        //                foreach (OptionMetadata om in ((StatusAttributeMetadata)rarr.AttributeMetadata).OptionSet.Options)
-        //                {
-        //                    DataRow dr = Data.NewRow();
-        //                    dr["Key"] = om.Value ?? 0;
-        //                    dr["Value"] = om.Value ?? 0;
-        //                    dr["Label"] = om.Label.LocalizedLabels[0].Label;
-        //                    Data.Rows.Add(dr);
-        //                }
-
-        //            Data.DefaultView.Sort = "Value ASC";
-        //        }
 
         //        internal void LoadRecord(string entityLogicalName, Guid recordId, bool customOnly, BackgroundWorker worker)
         //        {

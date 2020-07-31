@@ -323,6 +323,7 @@ namespace CRMViewerPlugin
                             result = Browser.GetEntityResult(Service, cache, dgvMain.Rows[row].Cells[0].Value.ToString(), worker);
                             break;
                         case Result.ResultType.Entity:
+                            result = Browser.GetPicklistResult(Service,results.Peek().EntityLogicalName, dgvMain.Rows[row].Cells[0].Value.ToString(), worker);
                             break;
                         case Result.ResultType.PickList:
                             break;
