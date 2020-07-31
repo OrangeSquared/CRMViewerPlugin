@@ -110,6 +110,7 @@ namespace CRMViewerPlugin
 
             #region attributes
             retVal.Header = "Entity " + entityLogicalName;
+            retVal.EntityLogicalName = entityLogicalName;
 
             retVal.FromCache = cache.ContainsKey(entityLogicalName);
             if (retVal.FromCache)

@@ -174,16 +174,44 @@ namespace CRMViewerPlugin
             {
                 MenuItem miCopyKey = new MenuItem("Copy Key");
                 miCopyKey.Click += (object ss, EventArgs ee) => Clipboard.SetText(dgvMain.SelectedRows[0].Cells[0].Value.ToString());
+                MenuItem miOpenInBrowser = new MenuItem("Open in Browser");
+                miOpenInBrowser.Click += MiOpenInBrowser_Click;
 
                 ContextMenu contextMenu = new ContextMenu(new MenuItem[]
                 {
                     miCopyKey,
-                    //miCopyAll,
+                    miOpenInBrowser,
                 });
 
                 contextMenu.Show(dgvMain, e.Location);
             }
 
+        }
+
+        private void MiOpenInBrowser_Click(object sender, EventArgs e)
+        {
+            string rootURI = string.Format("https://{0}:{1}",
+                ((Microsoft.Xrm.Tooling.Connector.CrmServiceClient)Service).CrmConnectOrgUriActual.Host,
+                ((Microsoft.Xrm.Tooling.Connector.CrmServiceClient)Service).CrmConnectOrgUriActual.Port);
+            string targetUri = null;
+
+            switch (results.Peek().DataType)
+            {
+                case Result.ResultType.EntityList:
+                    targetUri = string.Format("{0}//main.aspx?etn={1}&pagetype=entitylist", rootURI, dgvMain.SelectedRows[0].Cells[0].Value.ToString());
+                    break;
+                case Result.ResultType.Entity:
+                    break;
+                case Result.ResultType.PickList:
+                    break;
+                case Result.ResultType.Record:
+                    //targetUri = string.Format("{0}//main.aspx?etn={1}&pagetype=entityrecord&id={2}", rootURI, results.Peek().EntityLogicalName, recordId);
+                    break;
+                default:
+                    break;
+            }
+
+            System.Diagnostics.Process.Start(targetUri);
         }
 
         private void splitContainer1_SplitterMoved(object sender, SplitterEventArgs e)

@@ -23,6 +23,8 @@ namespace CRMViewerPlugin
 
         public string Header { get; set; }
 
+        public string EntityLogicalName { get; set; }
+
         public bool FromCache { get; set; }
 
         public string SearchText { get; set; }
