@@ -78,11 +78,8 @@ namespace CRMViewerPlugin
                 LogInfo("Settings found and loaded");
             }
 
-            //splitContainer1.SplitterDistance = mySettings.SplitterPosition;
-
             results = new Stack<Result>();
             ExecuteMethod(LoadEntityList);
-            insetup = false;
         }
 
         private void tsbClose_Click(object sender, EventArgs e) { CloseTool(); }
@@ -164,12 +161,13 @@ namespace CRMViewerPlugin
 
         private void tsbRefresh_Click(object sender, EventArgs e) { Refresh(); }
 
-        
+
         private void dgvMain_MouseDown(object sender, MouseEventArgs e)
         {
+            if (dgvMain.HitTest(e.X,e.Y).RowIndex>=0)
             dgvMain.Rows[dgvMain.HitTest(e.X, e.Y).RowIndex].Selected = true;
         }
-        
+
         private void dgvMain_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
@@ -194,6 +192,15 @@ namespace CRMViewerPlugin
             {
                 mySettings.SplitterPosition = splitContainer1.SplitterDistance;
                 SettingsManager.Instance.Save(GetType(), mySettings);
+            }
+        }
+
+        private void ctlCRMViewer_Paint(object sender, PaintEventArgs e)
+        {
+            if (insetup)
+            {
+                splitContainer1.SplitterDistance = mySettings.SplitterPosition;
+                insetup = false;
             }
         }
 
@@ -238,6 +245,18 @@ namespace CRMViewerPlugin
             string search = results.Peek().SearchText;
             tsbSearch.Text = "";
             tsbSearch.Text = search;
+
+            if (results.Peek().Data.Tables.Count>1)
+            {
+                DataTable det = results.Peek().Data.Tables[1];
+                dgvRelationships.DataSource = det;
+                dgvRelationships.Columns["key"].Visible = false;
+                dgvRelationships.RowHeadersWidth = dgvRelationships.ColumnHeadersHeight;
+            }
+            else
+            {
+                dgvRelationships.DataSource = null;
+            }
 
             SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs(string.Format("{0} results loaded", dgvMain.Rows.Count)));
         }
@@ -343,6 +362,7 @@ namespace CRMViewerPlugin
             };
             WorkAsync(wai);
         }
+
         #endregion
 
 

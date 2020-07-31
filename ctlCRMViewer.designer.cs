@@ -233,6 +233,7 @@
             this.OnCloseTool += new System.EventHandler(this.MyPluginControl_OnCloseTool);
             this.ConnectionUpdated += new XrmToolBox.Extensibility.PluginControlBase.ConnectionUpdatedHandler(this.ctlCRMViewer_ConnectionUpdated);
             this.Load += new System.EventHandler(this.MyPluginControl_Load);
+            this.Paint += new System.Windows.Forms.PaintEventHandler(this.ctlCRMViewer_Paint);
             this.toolStripMenu.ResumeLayout(false);
             this.toolStripMenu.PerformLayout();
             this.gbMain.ResumeLayout(false);

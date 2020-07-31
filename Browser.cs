@@ -100,6 +100,15 @@ namespace CRMViewerPlugin
             retVal.DataType = Result.ResultType.Entity;
             retVal.Key = entityLogicalName;
 
+            RetrieveEntityRequest request = new RetrieveEntityRequest()
+            {
+                EntityFilters = EntityFilters.Attributes | EntityFilters.Relationships,
+                RetrieveAsIfPublished = true,
+                LogicalName = entityLogicalName
+            };
+            RetrieveEntityResponse response = (RetrieveEntityResponse)service.Execute(request);
+
+            #region attributes
             retVal.Header = "Entity " + entityLogicalName;
 
             retVal.FromCache = cache.ContainsKey(entityLogicalName);
@@ -125,13 +134,6 @@ namespace CRMViewerPlugin
                 Data.PrimaryKey = new DataColumn[] { Data.Columns["Key"] };
 
 
-                RetrieveEntityRequest request = new RetrieveEntityRequest()
-                {
-                    EntityFilters = EntityFilters.Attributes,
-                    RetrieveAsIfPublished = true,
-                    LogicalName = entityLogicalName
-                };
-                RetrieveEntityResponse response = (RetrieveEntityResponse)service.Execute(request);
 
                 int pos = 1;
                 int max = response.EntityMetadata.Attributes.Count();
@@ -195,6 +197,54 @@ namespace CRMViewerPlugin
                     cache.Remove(entityLogicalName);
                 cache[entityLogicalName] = DSToSerial(retVal.Data);
             }
+            #endregion
+
+            #region relationships
+            DataTable relationships = new DataTable("Relationships");
+            retVal.Data.Tables.Add(relationships);
+            relationships.Columns.AddRange(new DataColumn[]
+            {
+                new DataColumn("key", typeof(string)),
+                new DataColumn("Type", typeof(string)),
+                new DataColumn("From Attribute", typeof(string)),
+                new DataColumn("To Entity", typeof(string)),
+                new DataColumn("To Attribute", typeof(string)),
+            });
+
+            DataRow ndr;
+            foreach (OneToManyRelationshipMetadata x in response.EntityMetadata.OneToManyRelationships)
+            {
+                ndr = relationships.NewRow();
+                ndr["key"] = x.SchemaName;
+                ndr["Type"] = "M:1";
+                ndr["From Attribute"] = x.ReferencedAttribute;
+                ndr["To Entity"] = x.ReferencingEntity;
+                ndr["To Attribute"] = x.ReferencingAttribute;
+                relationships.Rows.Add(ndr);
+            }
+            foreach (OneToManyRelationshipMetadata x in response.EntityMetadata.ManyToOneRelationships)
+            {
+                ndr = relationships.NewRow();
+                ndr["key"] = x.SchemaName;
+                ndr["Type"] = "1:M";
+                ndr["From Attribute"] = x.ReferencingAttribute;
+                ndr["To Entity"] = x.ReferencedEntity;
+                ndr["To Attribute"] = x.ReferencedAttribute;
+                relationships.Rows.Add(ndr);
+            }
+            foreach (ManyToManyRelationshipMetadata x in response.EntityMetadata.ManyToManyRelationships)
+            {
+                ndr = relationships.NewRow();
+                ndr["key"] = x.SchemaName;
+                ndr["Type"] = "M:M";
+                ndr["From Attribute"] = null;
+                ndr["To Entity"] = x.Entity1LogicalName == entityLogicalName ? x.Entity2LogicalName : x.Entity1LogicalName;
+                ndr["To Attribute"] = null;
+                relationships.Rows.Add(ndr);
+            }
+
+            #endregion
+
             return retVal;
         }
 
