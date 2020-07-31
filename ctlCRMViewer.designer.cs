@@ -176,8 +176,9 @@
             // 
             this.splitContainer1.Panel2.Controls.Add(this.dgvRelationships);
             this.splitContainer1.Size = new System.Drawing.Size(1116, 386);
-            this.splitContainer1.SplitterDistance = 574;
+            this.splitContainer1.SplitterDistance = 442;
             this.splitContainer1.TabIndex = 1;
+            this.splitContainer1.SplitterMoved += new System.Windows.Forms.SplitterEventHandler(this.splitContainer1_SplitterMoved);
             // 
             // dgvMain
             // 
@@ -193,11 +194,11 @@
             this.dgvMain.MultiSelect = false;
             this.dgvMain.Name = "dgvMain";
             this.dgvMain.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvMain.Size = new System.Drawing.Size(574, 386);
+            this.dgvMain.Size = new System.Drawing.Size(442, 386);
             this.dgvMain.TabIndex = 0;
             this.dgvMain.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvMain_CellDoubleClick);
-            this.dgvMain.CellMouseDown += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dgvMain_CellMouseDown);
-            this.dgvMain.CellMouseUp += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dgvMain_CellMouseUp);
+            this.dgvMain.MouseDown += new System.Windows.Forms.MouseEventHandler(this.dgvMain_MouseDown);
+            this.dgvMain.MouseUp += new System.Windows.Forms.MouseEventHandler(this.dgvMain_MouseUp);
             // 
             // dgvRelationships
             // 
@@ -213,7 +214,7 @@
             this.dgvRelationships.Name = "dgvRelationships";
             this.dgvRelationships.ReadOnly = true;
             this.dgvRelationships.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvRelationships.Size = new System.Drawing.Size(538, 386);
+            this.dgvRelationships.Size = new System.Drawing.Size(670, 386);
             this.dgvRelationships.TabIndex = 1;
             // 
             // contextMenuStrip1
@@ -230,6 +231,7 @@
             this.Name = "ctlCRMViewer";
             this.Size = new System.Drawing.Size(1128, 436);
             this.OnCloseTool += new System.EventHandler(this.MyPluginControl_OnCloseTool);
+            this.ConnectionUpdated += new XrmToolBox.Extensibility.PluginControlBase.ConnectionUpdatedHandler(this.ctlCRMViewer_ConnectionUpdated);
             this.Load += new System.EventHandler(this.MyPluginControl_Load);
             this.toolStripMenu.ResumeLayout(false);
             this.toolStripMenu.PerformLayout();

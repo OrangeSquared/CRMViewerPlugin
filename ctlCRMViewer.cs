@@ -24,6 +24,7 @@ namespace CRMViewerPlugin
         private Stack<Result> results;
         private DataTable activeList;
         private Menu popupMenu;
+        private bool insetup = true;
 
         public event EventHandler<StatusBarMessageEventArgs> SendMessageToStatusBar;
 
@@ -60,6 +61,7 @@ namespace CRMViewerPlugin
         #region plugin stuff
         private void MyPluginControl_Load(object sender, EventArgs e)
         {
+            insetup = true;
             //ShowInfoNotification("This is a notification that can lead to XrmToolBox repository", new Uri("https://github.com/MscrmTools/XrmToolBox"));
 
             // Loads or creates the settings for the plugin
@@ -76,8 +78,11 @@ namespace CRMViewerPlugin
                 LogInfo("Settings found and loaded");
             }
 
+            //splitContainer1.SplitterDistance = mySettings.SplitterPosition;
+
             results = new Stack<Result>();
             ExecuteMethod(LoadEntityList);
+            insetup = false;
         }
 
         private void tsbClose_Click(object sender, EventArgs e) { CloseTool(); }
@@ -95,6 +100,10 @@ namespace CRMViewerPlugin
                 results = new Stack<Result>();
                 LoadEntityList();
             }
+        }
+        private void ctlCRMViewer_ConnectionUpdated(object sender, ConnectionUpdatedEventArgs e)
+        {
+
         }
 
 
@@ -155,14 +164,14 @@ namespace CRMViewerPlugin
 
         private void tsbRefresh_Click(object sender, EventArgs e) { Refresh(); }
 
-        private void dgvMain_CellMouseDown(object sender, DataGridViewCellMouseEventArgs e)
+        
+        private void dgvMain_MouseDown(object sender, MouseEventArgs e)
         {
             dgvMain.Rows[dgvMain.HitTest(e.X, e.Y).RowIndex].Selected = true;
         }
-
-        private void dgvMain_CellMouseUp(object sender, DataGridViewCellMouseEventArgs e)
+        
+        private void dgvMain_MouseUp(object sender, MouseEventArgs e)
         {
-
             if (e.Button == MouseButtons.Right)
             {
                 MenuItem miCopyKey = new MenuItem("Copy Key");
@@ -175,7 +184,16 @@ namespace CRMViewerPlugin
                 });
 
                 contextMenu.Show(dgvMain, e.Location);
+            }
 
+        }
+
+        private void splitContainer1_SplitterMoved(object sender, SplitterEventArgs e)
+        {
+            if (mySettings != null && !insetup)
+            {
+                mySettings.SplitterPosition = splitContainer1.SplitterDistance;
+                SettingsManager.Instance.Save(GetType(), mySettings);
             }
         }
 
@@ -242,7 +260,7 @@ namespace CRMViewerPlugin
         }
 
 
-
+        #region Navigation
         private void NavigateIn(int row)
         {
             WorkAsyncInfo wai = new WorkAsyncInfo
@@ -282,7 +300,6 @@ namespace CRMViewerPlugin
             };
             WorkAsync(wai);
         }
-
 
         private void Refresh()
         {
@@ -326,6 +343,8 @@ namespace CRMViewerPlugin
             };
             WorkAsync(wai);
         }
+        #endregion
+
 
 
 
