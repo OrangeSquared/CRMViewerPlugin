@@ -176,16 +176,57 @@ namespace CRMViewerPlugin
                 miCopyKey.Click += (object ss, EventArgs ee) => Clipboard.SetText(dgvMain.SelectedRows[0].Cells[0].Value.ToString());
                 MenuItem miOpenInBrowser = new MenuItem("Open in Browser");
                 miOpenInBrowser.Click += MiOpenInBrowser_Click;
+                MenuItem miOpenRecord = new MenuItem("Open Record");
+                miOpenRecord.Click += MiOpenRecord_Click;
 
                 ContextMenu contextMenu = new ContextMenu(new MenuItem[]
                 {
                     miCopyKey,
                     miOpenInBrowser,
+                    miOpenRecord,
                 });
 
                 contextMenu.Show(dgvMain, e.Location);
             }
 
+        }
+
+        private void MiOpenRecord_Click(object sender, EventArgs e)
+        {
+            string possibleid = Clipboard.ContainsText() ? Clipboard.GetText() : string.Empty;
+            Guid id = Guid.Empty;
+
+            if (!Guid.TryParse(possibleid, out id))
+            {
+                string fetchXML = string.Format(@"<fetch top='1' >  <entity name='{0}' >    <attribute name='{0}id' />  </entity></fetch>", results.Peek().EntityLogicalName);
+                EntityCollection ec = Service.RetrieveMultiple(new FetchExpression(fetchXML));
+                if (ec.Entities.Count > 0)
+                    id = ec.Entities[0].Id;
+            }
+            if (id != Guid.Empty)
+            {
+                WorkAsyncInfo wai = new WorkAsyncInfo
+                {
+                    Message = "Retrieving info from CRM...",
+                    Work = (worker, args) =>
+                    {
+                        Result result = Browser.GetRecordResult(Service,cache,results.Peek().EntityLogicalName, id, worker);
+                        if (result != null)
+                        {
+                            results.Push(result);
+                            if (!result.FromCache)
+                                SaveCache();
+                        }
+
+                    },
+                    ProgressChanged = ProgressChanged,
+                    PostWorkCallBack = NewResultsAvailable,
+                    AsyncArgument = null,
+                    MessageHeight = 150,
+                    MessageWidth = 340
+                };
+                WorkAsync(wai);
+            }
         }
 
         private void MiOpenInBrowser_Click(object sender, EventArgs e)

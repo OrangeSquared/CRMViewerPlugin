@@ -32,5 +32,6 @@ namespace CRMViewerPlugin
         public ResultType DataType { get; set; }
 
         public string Key { get; set; }
+        public Guid EntityRecordId { get;  set; }
     }
 }
