@@ -10,34 +10,28 @@ using XrmToolBox.Extensibility;
 
 namespace CRMViewerPlugin
 {
-    abstract class Result
+    class Result
     {
-        internal IOrganizationService service;
+        public enum ResultType { EntityList, Entity, PickList, Record }
 
-        private DataTable _data;
-        public DataTable Data
+        private DataSet _data;
+        public DataSet Data
         {
             get { return _data; }
             set { _data = value; }
         }
 
-        private DataTable _data2;
-        public DataTable Data2
-        {
-            get { return _data2; }
-            set { _data2 = value; }
-        }
+        public string Header { get; set; }
 
-        public abstract string Header { get; }
-        public abstract Result ProcessSelection(object sender, object selection, System.ComponentModel.BackgroundWorker worker);
-        public abstract void Refresh(System.ComponentModel.BackgroundWorker worker);
-
-        public abstract string Status { get;  }
+        public string EntityLogicalName { get; set; }
 
         public bool FromCache { get; set; }
 
         public string SearchText { get; set; }
 
-        public abstract MenuItem[] GetContextMenu(object selection);
+        public ResultType DataType { get; set; }
+
+        public string Key { get; set; }
+        public Guid EntityRecordId { get;  set; }
     }
 }

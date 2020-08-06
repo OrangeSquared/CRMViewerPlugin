@@ -142,10 +142,8 @@
     </Compile>
     <Compile Include="ProgressEventHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RecordNotFound.cs" />
     <Compile Include="Result.cs" />
     <Compile Include="Settings.cs" />
-    <Compile Include="TopMenu.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

@@ -16,5 +16,6 @@ namespace CRMViewerPlugin
     {
         public string LastUsedOrganizationWebappUrl { get; set; }
         public bool ShowDefaultAttributes { get; set; }
+        public int SplitterPosition { get;  set; }
     }
 }
