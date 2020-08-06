@@ -175,22 +175,22 @@ namespace CRMViewerPlugin
             dgvMain.Columns["Key"].Visible = false;
             dgvMain.RowHeadersWidth = dgvMain.ColumnHeadersHeight;
             tsbSearch.Text = results.Peek().SearchText;
-            tsbOpenInBrowser.Visible = (results.Peek().GetType().Name == "Browser");
+            //tsbOpenInBrowser.Visible = (results.Peek().GetType().Name == "Browser");
 
-            if (results.Peek().GetType().Name == "Browser" && ((Browser)results.Peek()).currentSelectionType == Browser.SelectionType.Entity)
-            {
-                tslRecordID.Visible = true;
-                tstbRecordID.Visible = true;
-                tsbLoadRecord.Visible = true;
-                tssRecord.Visible = true;
-            }
-            else
-            {
-                tslRecordID.Visible = false;
-                tstbRecordID.Visible = false;
-                tsbLoadRecord.Visible = false;
-                tssRecord.Visible = false;
-            }
+            //if (results.Peek().GetType().Name == "Browser" && ((Browser)results.Peek()).currentSelectionType == Browser.SelectionType.Entity)
+            //{
+            //    tslRecordID.Visible = true;
+            //    tstbRecordID.Visible = true;
+            //    tsbLoadRecord.Visible = true;
+            //    tssRecord.Visible = true;
+            //}
+            //else
+            //{
+            //    tslRecordID.Visible = false;
+            //    tstbRecordID.Visible = false;
+            //    tsbLoadRecord.Visible = false;
+            //    tssRecord.Visible = false;
+            //}
 
             SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs(string.Format("{0} results loaded", dgvMain.Rows.Count)));
 
@@ -274,11 +274,6 @@ namespace CRMViewerPlugin
                 MessageWidth = 340
             };
             WorkAsync(wai);
-        }
-
-        private void tsbOpenInBrowser_Click(object sender, EventArgs e)
-        {
-            ((Browser)results.Peek()).OpenInBrowser();
         }
 
         private void tsbSearch_TextChanged(object sender, EventArgs e)
@@ -393,37 +388,37 @@ namespace CRMViewerPlugin
 
         }
 
-        private void tsbLoadRecord_Click(object sender, EventArgs e)
-        {
-            if (results.Peek().GetType().Name == "Browser" && ((Browser)results.Peek()).currentSelectionType == Browser.SelectionType.Entity)
-            {
-                Guid recordId = Guid.Empty;
-                if (Guid.TryParse(tstbRecordID.Text.Trim(), out recordId))
-                {
-                    WorkAsyncInfo wai = new WorkAsyncInfo
-                    {
-                        Message = "Retrieving info from CRM...",
-                        Work = (worker, args) =>
-                        {
-                            Browser browser = new Browser(Service);
-                            browser.LoadRecord(((Browser)results.Peek()).EntityLogicalName, recordId, stbCustomFields.Checked, worker);
-                            Result result = browser;
+        //private void tsbLoadRecord_Click(object sender, EventArgs e)
+        //{
+        //    if (results.Peek().GetType().Name == "Browser" && ((Browser)results.Peek()).currentSelectionType == Browser.SelectionType.Entity)
+        //    {
+        //        Guid recordId = Guid.Empty;
+        //        if (Guid.TryParse(tstbRecordID.Text.Trim(), out recordId))
+        //        {
+        //            WorkAsyncInfo wai = new WorkAsyncInfo
+        //            {
+        //                Message = "Retrieving info from CRM...",
+        //                Work = (worker, args) =>
+        //                {
+        //                    Browser browser = new Browser(Service);
+        //                    browser.LoadRecord(((Browser)results.Peek()).EntityLogicalName, recordId, stbCustomFields.Checked, worker);
+        //                    Result result = browser;
 
-                            if (result != null)
-                                results.Push(result);
-                        },
-                        ProgressChanged = ProgressChanged,
-                        PostWorkCallBack = NewResultsAvailable,
-                        AsyncArgument = null,
-                        MessageHeight = 150,
-                        MessageWidth = 340
-                    };
-                    WorkAsync(wai);
+        //                    if (result != null)
+        //                        results.Push(result);
+        //                },
+        //                ProgressChanged = ProgressChanged,
+        //                PostWorkCallBack = NewResultsAvailable,
+        //                AsyncArgument = null,
+        //                MessageHeight = 150,
+        //                MessageWidth = 340
+        //            };
+        //            WorkAsync(wai);
 
 
-                }
-            }
-        }
+        //        }
+        //    }
+        //}
 
         private void stbCustomFields_Click(object sender, EventArgs e)
         {
@@ -456,28 +451,36 @@ namespace CRMViewerPlugin
             }
         }
 
-        private void tstbRecordID_Enter(object sender, EventArgs e)
-        {
-            tstbRecordID.SelectAll();
-        }
-
         private void dgvMain_MouseDown(object sender, MouseEventArgs e)
         {
+            string currentSelection = dgvMain.SelectedRows[0].Cells[0].Value.ToString();
             MenuItem miCopyAll = new MenuItem("Copy All");
             miCopyAll.Click += miCopyAll_Click;
+            MenuItem miCopyKey = new MenuItem("Copy Key");
+            miCopyKey.Click += miCopyKey_Click;
 
             if (e.Button == MouseButtons.Right)
             {
                 ContextMenu contextMenu = new ContextMenu(new MenuItem[]
                 {
-                    miCopyAll
+                    miCopyKey,
+                    miCopyAll,
                 });
                 MenuItem[] resultmis = results.Peek().GetContextMenu(dgvMain.SelectedRows[0].Cells[0].Value);
                 if (resultmis != null)
-                    contextMenu.MenuItems.AddRange(resultmis);
-
+                    foreach (MenuItem mi in resultmis)
+                    {
+                        mi.Tag = currentSelection;
+                        contextMenu.MenuItems.Add(mi);
+                    }
+                
                 contextMenu.Show(dgvMain, e.Location);
             }
+        }
+
+        private void miCopyKey_Click(object sender, EventArgs e)
+        {
+            Clipboard.SetText(dgvMain.SelectedRows[0].Cells[1].Value.ToString());
         }
 
         private void miCopyAll_Click(object sender, EventArgs e)

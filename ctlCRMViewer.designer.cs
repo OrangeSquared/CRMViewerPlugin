@@ -32,7 +32,6 @@
             this.toolStripMenu = new System.Windows.Forms.ToolStrip();
             this.tsbBack = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.tsbOpenInBrowser = new System.Windows.Forms.ToolStripButton();
             this.stbCustomFields = new System.Windows.Forms.ToolStripButton();
             this.tssSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.tslCached = new System.Windows.Forms.ToolStripLabel();
@@ -41,15 +40,18 @@
             this.tsbSearch = new System.Windows.Forms.ToolStripTextBox();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.tslRecordID = new System.Windows.Forms.ToolStripLabel();
-            this.tstbRecordID = new System.Windows.Forms.ToolStripTextBox();
-            this.tsbLoadRecord = new System.Windows.Forms.ToolStripButton();
-            this.tssRecord = new System.Windows.Forms.ToolStripSeparator();
             this.gbMain = new System.Windows.Forms.GroupBox();
             this.dgvMain = new System.Windows.Forms.DataGridView();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.dgvRelationships = new System.Windows.Forms.DataGridView();
             this.toolStripMenu.SuspendLayout();
             this.gbMain.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvMain)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+            this.splitContainer1.Panel1.SuspendLayout();
+            this.splitContainer1.Panel2.SuspendLayout();
+            this.splitContainer1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvRelationships)).BeginInit();
             this.SuspendLayout();
             // 
             // toolStripMenu
@@ -58,7 +60,6 @@
             this.toolStripMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsbBack,
             this.toolStripSeparator3,
-            this.tsbOpenInBrowser,
             this.stbCustomFields,
             this.tssSeparator1,
             this.tslCached,
@@ -66,11 +67,7 @@
             this.toolStripSeparator1,
             this.tsbSearch,
             this.toolStripLabel1,
-            this.toolStripSeparator2,
-            this.tslRecordID,
-            this.tstbRecordID,
-            this.tsbLoadRecord,
-            this.tssRecord});
+            this.toolStripSeparator2});
             this.toolStripMenu.Location = new System.Drawing.Point(0, 0);
             this.toolStripMenu.Name = "toolStripMenu";
             this.toolStripMenu.Size = new System.Drawing.Size(1128, 25);
@@ -90,16 +87,6 @@
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
             this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
-            // 
-            // tsbOpenInBrowser
-            // 
-            this.tsbOpenInBrowser.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.tsbOpenInBrowser.Image = ((System.Drawing.Image)(resources.GetObject("tsbOpenInBrowser.Image")));
-            this.tsbOpenInBrowser.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbOpenInBrowser.Name = "tsbOpenInBrowser";
-            this.tsbOpenInBrowser.Size = new System.Drawing.Size(98, 22);
-            this.tsbOpenInBrowser.Text = "Open in Browser";
-            this.tsbOpenInBrowser.Click += new System.EventHandler(this.tsbOpenInBrowser_Click);
             // 
             // stbCustomFields
             // 
@@ -162,41 +149,12 @@
             this.toolStripSeparator2.Name = "toolStripSeparator2";
             this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
             // 
-            // tslRecordID
-            // 
-            this.tslRecordID.Name = "tslRecordID";
-            this.tslRecordID.Size = new System.Drawing.Size(55, 22);
-            this.tslRecordID.Text = "RecordID";
-            // 
-            // tstbRecordID
-            // 
-            this.tstbRecordID.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.tstbRecordID.Name = "tstbRecordID";
-            this.tstbRecordID.Size = new System.Drawing.Size(225, 25);
-            this.tstbRecordID.Text = "00000000-0000-0000-0000-000000000000";
-            this.tstbRecordID.Enter += new System.EventHandler(this.tstbRecordID_Enter);
-            // 
-            // tsbLoadRecord
-            // 
-            this.tsbLoadRecord.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.tsbLoadRecord.Image = ((System.Drawing.Image)(resources.GetObject("tsbLoadRecord.Image")));
-            this.tsbLoadRecord.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbLoadRecord.Name = "tsbLoadRecord";
-            this.tsbLoadRecord.Size = new System.Drawing.Size(37, 22);
-            this.tsbLoadRecord.Text = "Load";
-            this.tsbLoadRecord.Click += new System.EventHandler(this.tsbLoadRecord_Click);
-            // 
-            // tssRecord
-            // 
-            this.tssRecord.Name = "tssRecord";
-            this.tssRecord.Size = new System.Drawing.Size(6, 25);
-            // 
             // gbMain
             // 
             this.gbMain.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.gbMain.Controls.Add(this.dgvMain);
+            this.gbMain.Controls.Add(this.splitContainer1);
             this.gbMain.Location = new System.Drawing.Point(3, 28);
             this.gbMain.Name = "gbMain";
             this.gbMain.Size = new System.Drawing.Size(1122, 405);
@@ -209,22 +167,54 @@
             this.dgvMain.AllowUserToAddRows = false;
             this.dgvMain.AllowUserToDeleteRows = false;
             this.dgvMain.AllowUserToResizeRows = false;
-            this.dgvMain.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.dgvMain.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
             this.dgvMain.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvMain.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvMain.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
-            this.dgvMain.Location = new System.Drawing.Point(6, 19);
+            this.dgvMain.Location = new System.Drawing.Point(0, 0);
             this.dgvMain.MultiSelect = false;
             this.dgvMain.Name = "dgvMain";
             this.dgvMain.ReadOnly = true;
             this.dgvMain.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvMain.Size = new System.Drawing.Size(1110, 380);
+            this.dgvMain.Size = new System.Drawing.Size(574, 386);
             this.dgvMain.TabIndex = 0;
             this.dgvMain.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvMain_CellDoubleClick);
             this.dgvMain.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dgvMain_KeyDown);
             this.dgvMain.MouseDown += new System.Windows.Forms.MouseEventHandler(this.dgvMain_MouseDown);
+            // 
+            // splitContainer1
+            // 
+            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer1.Location = new System.Drawing.Point(3, 16);
+            this.splitContainer1.Name = "splitContainer1";
+            // 
+            // splitContainer1.Panel1
+            // 
+            this.splitContainer1.Panel1.Controls.Add(this.dgvMain);
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Controls.Add(this.dgvRelationships);
+            this.splitContainer1.Size = new System.Drawing.Size(1116, 386);
+            this.splitContainer1.SplitterDistance = 574;
+            this.splitContainer1.TabIndex = 1;
+            // 
+            // dgvRelationships
+            // 
+            this.dgvRelationships.AllowUserToAddRows = false;
+            this.dgvRelationships.AllowUserToDeleteRows = false;
+            this.dgvRelationships.AllowUserToResizeRows = false;
+            this.dgvRelationships.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
+            this.dgvRelationships.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvRelationships.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgvRelationships.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
+            this.dgvRelationships.Location = new System.Drawing.Point(0, 0);
+            this.dgvRelationships.MultiSelect = false;
+            this.dgvRelationships.Name = "dgvRelationships";
+            this.dgvRelationships.ReadOnly = true;
+            this.dgvRelationships.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.dgvRelationships.Size = new System.Drawing.Size(538, 386);
+            this.dgvRelationships.TabIndex = 1;
             // 
             // ctlCRMViewer
             // 
@@ -239,6 +229,11 @@
             this.toolStripMenu.PerformLayout();
             this.gbMain.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgvMain)).EndInit();
+            this.splitContainer1.Panel1.ResumeLayout(false);
+            this.splitContainer1.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
+            this.splitContainer1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dgvRelationships)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -253,15 +248,12 @@
         private System.Windows.Forms.ToolStripLabel tslCached;
         private System.Windows.Forms.ToolStripButton tsbRefresh;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ToolStripButton tsbOpenInBrowser;
         private System.Windows.Forms.ToolStripLabel toolStripLabel1;
         private System.Windows.Forms.ToolStripTextBox tsbSearch;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
-        private System.Windows.Forms.ToolStripLabel tslRecordID;
-        private System.Windows.Forms.ToolStripTextBox tstbRecordID;
-        private System.Windows.Forms.ToolStripButton tsbLoadRecord;
-        private System.Windows.Forms.ToolStripSeparator tssRecord;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripButton stbCustomFields;
+        private System.Windows.Forms.SplitContainer splitContainer1;
+        private System.Windows.Forms.DataGridView dgvRelationships;
     }
 }

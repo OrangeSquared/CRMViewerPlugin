@@ -21,6 +21,13 @@ namespace CRMViewerPlugin
             set { _data = value; }
         }
 
+        private DataTable _data2;
+        public DataTable Data2
+        {
+            get { return _data2; }
+            set { _data2 = value; }
+        }
+
         public abstract string Header { get; }
         public abstract Result ProcessSelection(object sender, object selection, System.ComponentModel.BackgroundWorker worker);
         public abstract void Refresh(System.ComponentModel.BackgroundWorker worker);
