@@ -242,6 +242,7 @@ namespace CRMViewerPlugin
                     targetUri = string.Format("{0}//main.aspx?etn={1}&pagetype=entitylist", rootURI, dgvMain.SelectedRows[0].Cells[0].Value.ToString());
                     break;
                 case Result.ResultType.Entity:
+                    targetUri = string.Format("{0}//main.aspx?etn={1}&pagetype=entitylist", rootURI, results.Peek().EntityLogicalName);
                     break;
                 case Result.ResultType.PickList:
                     break;
