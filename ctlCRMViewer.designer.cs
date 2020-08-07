@@ -216,6 +216,7 @@
             this.dgvRelationships.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dgvRelationships.Size = new System.Drawing.Size(670, 386);
             this.dgvRelationships.TabIndex = 1;
+            this.dgvRelationships.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvRelationships_CellDoubleClick);
             // 
             // contextMenuStrip1
             // 

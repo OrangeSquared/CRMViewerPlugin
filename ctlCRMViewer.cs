@@ -134,6 +134,32 @@ namespace CRMViewerPlugin
             if (e.RowIndex < 0) return;
             NavigateIn(e.RowIndex);
         }
+        private void dgvRelationships_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+            WorkAsyncInfo wai = new WorkAsyncInfo
+            {
+                Message = "Retrieving info from CRM...",
+                Work = (worker, args) =>
+                {
+                    Result result = null;
+                    result = Browser.GetEntityResult(Service, cache, dgvRelationships.Rows[e.RowIndex].Cells[3].Value.ToString(), worker);
+                    if (result != null)
+                    {
+                        results.Push(result);
+                        if (!result.FromCache)
+                            SaveCache();
+                    }
+
+                },
+                ProgressChanged = ProgressChanged,
+                PostWorkCallBack = NewResultsAvailable,
+                AsyncArgument = null,
+                MessageHeight = 150,
+                MessageWidth = 340
+            };
+            WorkAsync(wai);
+        }
 
         private void tsbBack_Click(object sender, EventArgs e) { PageBack(); }
 
@@ -164,8 +190,8 @@ namespace CRMViewerPlugin
 
         private void dgvMain_MouseDown(object sender, MouseEventArgs e)
         {
-            if (dgvMain.HitTest(e.X,e.Y).RowIndex>=0)
-            dgvMain.Rows[dgvMain.HitTest(e.X, e.Y).RowIndex].Selected = true;
+            if (dgvMain.HitTest(e.X, e.Y).RowIndex >= 0)
+                dgvMain.Rows[dgvMain.HitTest(e.X, e.Y).RowIndex].Selected = true;
         }
 
         private void dgvMain_MouseUp(object sender, MouseEventArgs e)
@@ -210,7 +236,7 @@ namespace CRMViewerPlugin
                     Message = "Retrieving info from CRM...",
                     Work = (worker, args) =>
                     {
-                        Result result = Browser.GetRecordResult(Service,cache,results.Peek().EntityLogicalName, id, worker);
+                        Result result = Browser.GetRecordResult(Service, cache, results.Peek().EntityLogicalName, id, worker);
                         if (result != null)
                         {
                             results.Push(result);
@@ -316,7 +342,7 @@ namespace CRMViewerPlugin
             tsbSearch.Text = "";
             tsbSearch.Text = search;
 
-            if (results.Peek().Data.Tables.Count>1)
+            if (results.Peek().Data.Tables.Count > 1)
             {
                 DataTable det = results.Peek().Data.Tables[1];
                 dgvRelationships.DataSource = det;
@@ -365,7 +391,7 @@ namespace CRMViewerPlugin
                             result = Browser.GetEntityResult(Service, cache, dgvMain.Rows[row].Cells[0].Value.ToString(), worker);
                             break;
                         case Result.ResultType.Entity:
-                            result = Browser.GetPicklistResult(Service,results.Peek().EntityLogicalName, dgvMain.Rows[row].Cells[0].Value.ToString(), worker);
+                            result = Browser.GetPicklistResult(Service, results.Peek().EntityLogicalName, dgvMain.Rows[row].Cells[0].Value.ToString(), worker);
                             break;
                         case Result.ResultType.PickList:
                             break;
@@ -433,6 +459,7 @@ namespace CRMViewerPlugin
             };
             WorkAsync(wai);
         }
+
 
         #endregion
 
