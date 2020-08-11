@@ -205,12 +205,39 @@ namespace CRMViewerPlugin
                 MenuItem miOpenRecord = new MenuItem("Open Record");
                 miOpenRecord.Click += MiOpenRecord_Click;
 
-                ContextMenu contextMenu = new ContextMenu(new MenuItem[]
+                ContextMenu contextMenu = new ContextMenu();
+
+                switch (results.Peek().DataType)
                 {
-                    miCopyKey,
-                    miOpenInBrowser,
-                    miOpenRecord,
-                });
+                    case Result.ResultType.EntityList:
+                        contextMenu = new ContextMenu(new MenuItem[]
+                            {
+                                miCopyKey,
+                                miOpenInBrowser,
+                            });
+                        break;
+                    case Result.ResultType.Entity:
+                        contextMenu = new ContextMenu(new MenuItem[]
+                            {
+                                miCopyKey,
+                                miOpenInBrowser,
+                                miOpenRecord,
+                            });                        break;
+                    case Result.ResultType.PickList:
+                        contextMenu = new ContextMenu(new MenuItem[]
+                            {
+                                miCopyKey,
+                            });
+                        break;
+                    case Result.ResultType.Record:
+                        contextMenu = new ContextMenu(new MenuItem[]
+                            {
+                                miCopyKey,
+                            });
+                        break;
+                    default:
+                        break;
+                }
 
                 contextMenu.Show(dgvMain, e.Location);
             }
