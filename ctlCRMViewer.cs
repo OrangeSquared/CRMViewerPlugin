@@ -223,7 +223,7 @@ namespace CRMViewerPlugin
                                 miCopyKey,
                                 miOpenInBrowser,
                                 miOpenRecord,
-                            });                        break;
+                            }); break;
                     case Result.ResultType.PickList:
                         contextMenu = new ContextMenu(new MenuItem[]
                             {
@@ -419,7 +419,11 @@ namespace CRMViewerPlugin
                             result = Browser.GetEntityResult(Service, cache, dgvMain.Rows[row].Cells[0].Value.ToString(), worker);
                             break;
                         case Result.ResultType.Entity:
-                            result = Browser.GetPicklistResult(Service, results.Peek().EntityLogicalName, dgvMain.Rows[row].Cells[0].Value.ToString(), worker);
+                            string datatype = dgvMain.Rows[row].Cells[4].Value.ToString();
+                            if (datatype == "Picklist")
+                                result = Browser.GetPicklistResult(Service, results.Peek().EntityLogicalName, dgvMain.Rows[row].Cells[0].Value.ToString(), worker);
+                            else if (datatype == "Lookup")
+                                result = Browser.GetEntityResult(Service, cache, dgvMain.Rows[row].Cells[5].Value.ToString(), worker);
                             break;
                         case Result.ResultType.PickList:
                             break;
