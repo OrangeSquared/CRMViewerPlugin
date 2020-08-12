@@ -18,6 +18,7 @@ using System.Runtime.Remoting.Contexts;
 
 namespace CRMViewerPlugin
 {
+    //comment
     public partial class ctlCRMViewer : PluginControlBase, IStatusBarMessenger
     {
         private Settings mySettings;
