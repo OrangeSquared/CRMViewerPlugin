@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("CRMViewerPlugin")]
+[assembly: AssemblyTitle("OrangeSquared.Xrm.CRMViewer")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Orange Squared Services")]
-[assembly: AssemblyProduct("CRMViewerPlugin")]
+[assembly: AssemblyProduct("CRM Viewer")]
 [assembly: AssemblyCopyright("Copyright © 2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
