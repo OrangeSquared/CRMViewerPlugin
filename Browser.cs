@@ -51,16 +51,24 @@ namespace CRMViewerPlugin
             retVal.DataType = Result.ResultType.EntityList;
 
             retVal.Data = new DataSet();
-            DataTable Data = new DataTable();
-            retVal.Data.Tables.Add(Data);
+            DataTable main = new DataTable();
+            retVal.Data.Tables.Add(main);
+            DataTable keys = new DataTable();
+            retVal.Data.Tables.Add(keys);
 
-            Data.Columns.AddRange(new DataColumn[]
+            main.Columns.AddRange(new DataColumn[]
             {
                         new DataColumn("Key"),
                         new DataColumn("Logical Name"),
                         new DataColumn("Display Name")
             });
-            Data.PrimaryKey = new DataColumn[] { Data.Columns["Key"] };
+            main.PrimaryKey = new DataColumn[] { main.Columns["Key"] };
+
+            keys.Columns.AddRange(new DataColumn[]
+           {
+                        new DataColumn("Key"),
+                        new DataColumn("Name"),
+            });
 
             RetrieveAllEntitiesRequest retrieveAllEntitiesRequest = new RetrieveAllEntitiesRequest()
             {
@@ -74,22 +82,27 @@ namespace CRMViewerPlugin
 
             int pos = 1;
             int max = subset.Count();
-            Console.WriteLine(string.Format("\r\nLoading {0} entities", max));
             foreach (EntityMetadata e in subset)
             {
                 if (e.IsCustomizable.Value && e.DisplayName.LocalizedLabels.Count > 0)
                 {
-                    DataRow newDR = Data.NewRow();
+                    DataRow newDR = main.NewRow();
                     newDR[0] = e.LogicalName;
                     newDR[1] = e.LogicalName;
                     newDR[2] = e.DisplayName.LocalizedLabels.Count > 0 ? e.DisplayName.LocalizedLabels.First(x => x.LanguageCode == 1033).Label : e.LogicalName;
-                    Data.Rows.Add(newDR);
-                    //Util.ShowProgress(pos++, max);
+                    main.Rows.Add(newDR);
+
+                    newDR = keys.NewRow();
+                    newDR[0] = e.LogicalName;
+                    newDR[1] = string.Format("{0}({1})", e.LogicalName, e.DisplayName.LocalizedLabels.Count > 0 ? e.DisplayName.LocalizedLabels.First(x => x.LanguageCode == 1033).Label : e.LogicalName);
+                    keys.Rows.Add(newDR);
                 }
                 worker.ReportProgress((int)(100 * ((double)pos++ / (double)max)));
             }
-            Data.DefaultView.Sort = "Key ASC";
-            retVal.Header = string.Format("{0} Entities", Data.Rows.Count);
+            main.DefaultView.Sort = "Key ASC";
+            keys.DefaultView.Sort = "Key ASC";
+
+            retVal.Header = string.Format("{0} Entities", main.Rows.Count);
 
             return retVal;
         }

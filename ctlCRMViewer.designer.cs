@@ -40,18 +40,10 @@
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.gbMain = new System.Windows.Forms.GroupBox();
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.dgvMain = new System.Windows.Forms.DataGridView();
-            this.dgvRelationships = new System.Windows.Forms.DataGridView();
+            this.flpMain = new System.Windows.Forms.FlowLayoutPanel();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.toolStripMenu.SuspendLayout();
             this.gbMain.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
-            this.splitContainer1.Panel1.SuspendLayout();
-            this.splitContainer1.Panel2.SuspendLayout();
-            this.splitContainer1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvMain)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvRelationships)).BeginInit();
             this.SuspendLayout();
             // 
             // toolStripMenu
@@ -78,7 +70,6 @@
             this.tsbBack.Name = "tsbBack";
             this.tsbBack.Size = new System.Drawing.Size(36, 22);
             this.tsbBack.Text = "Back";
-            this.tsbBack.Click += new System.EventHandler(this.tsbBack_Click);
             // 
             // toolStripSeparator3
             // 
@@ -104,7 +95,6 @@
             this.tsbRefresh.Name = "tsbRefresh";
             this.tsbRefresh.Size = new System.Drawing.Size(50, 22);
             this.tsbRefresh.Text = "Refresh";
-            this.tsbRefresh.Click += new System.EventHandler(this.tsbRefresh_Click);
             // 
             // toolStripSeparator1
             // 
@@ -116,7 +106,6 @@
             this.tsbSearch.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.tsbSearch.Name = "tsbSearch";
             this.tsbSearch.Size = new System.Drawing.Size(200, 25);
-            this.tsbSearch.TextChanged += new System.EventHandler(this.tsbSearch_TextChanged);
             // 
             // toolStripLabel1
             // 
@@ -136,7 +125,7 @@
             this.gbMain.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.gbMain.Controls.Add(this.splitContainer1);
+            this.gbMain.Controls.Add(this.flpMain);
             this.gbMain.Location = new System.Drawing.Point(3, 28);
             this.gbMain.Name = "gbMain";
             this.gbMain.Size = new System.Drawing.Size(1122, 405);
@@ -144,61 +133,14 @@
             this.gbMain.TabStop = false;
             this.gbMain.Text = "gbMain";
             // 
-            // splitContainer1
+            // flpMain
             // 
-            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(3, 16);
-            this.splitContainer1.Name = "splitContainer1";
-            // 
-            // splitContainer1.Panel1
-            // 
-            this.splitContainer1.Panel1.Controls.Add(this.dgvMain);
-            // 
-            // splitContainer1.Panel2
-            // 
-            this.splitContainer1.Panel2.Controls.Add(this.dgvRelationships);
-            this.splitContainer1.Size = new System.Drawing.Size(1116, 386);
-            this.splitContainer1.SplitterDistance = 442;
-            this.splitContainer1.TabIndex = 1;
-            this.splitContainer1.SplitterMoved += new System.Windows.Forms.SplitterEventHandler(this.splitContainer1_SplitterMoved);
-            // 
-            // dgvMain
-            // 
-            this.dgvMain.AllowUserToAddRows = false;
-            this.dgvMain.AllowUserToDeleteRows = false;
-            this.dgvMain.AllowUserToResizeRows = false;
-            this.dgvMain.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
-            this.dgvMain.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
-            this.dgvMain.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvMain.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvMain.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
-            this.dgvMain.Location = new System.Drawing.Point(0, 0);
-            this.dgvMain.MultiSelect = false;
-            this.dgvMain.Name = "dgvMain";
-            this.dgvMain.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvMain.Size = new System.Drawing.Size(442, 386);
-            this.dgvMain.TabIndex = 0;
-            this.dgvMain.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvMain_CellDoubleClick);
-            this.dgvMain.MouseDown += new System.Windows.Forms.MouseEventHandler(this.dgvMain_MouseDown);
-            this.dgvMain.MouseUp += new System.Windows.Forms.MouseEventHandler(this.dgvMain_MouseUp);
-            // 
-            // dgvRelationships
-            // 
-            this.dgvRelationships.AllowUserToAddRows = false;
-            this.dgvRelationships.AllowUserToDeleteRows = false;
-            this.dgvRelationships.AllowUserToResizeRows = false;
-            this.dgvRelationships.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
-            this.dgvRelationships.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvRelationships.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvRelationships.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
-            this.dgvRelationships.Location = new System.Drawing.Point(0, 0);
-            this.dgvRelationships.MultiSelect = false;
-            this.dgvRelationships.Name = "dgvRelationships";
-            this.dgvRelationships.ReadOnly = true;
-            this.dgvRelationships.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvRelationships.Size = new System.Drawing.Size(670, 386);
-            this.dgvRelationships.TabIndex = 1;
-            this.dgvRelationships.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvRelationships_CellDoubleClick);
+            this.flpMain.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flpMain.Location = new System.Drawing.Point(3, 16);
+            this.flpMain.Name = "flpMain";
+            this.flpMain.Size = new System.Drawing.Size(1116, 386);
+            this.flpMain.TabIndex = 0;
+            this.flpMain.WrapContents = false;
             // 
             // contextMenuStrip1
             // 
@@ -213,19 +155,12 @@
             this.Controls.Add(this.toolStripMenu);
             this.Name = "ctlCRMViewer";
             this.Size = new System.Drawing.Size(1128, 436);
-            this.OnCloseTool += new System.EventHandler(this.MyPluginControl_OnCloseTool);
+            this.OnCloseTool += new System.EventHandler(this.ctlCRMViewer_OnCloseTool);
             this.ConnectionUpdated += new XrmToolBox.Extensibility.PluginControlBase.ConnectionUpdatedHandler(this.ctlCRMViewer_ConnectionUpdated);
-            this.Load += new System.EventHandler(this.MyPluginControl_Load);
-            this.Paint += new System.Windows.Forms.PaintEventHandler(this.ctlCRMViewer_Paint);
+            this.Load += new System.EventHandler(this.ctlCRMViewer_Load);
             this.toolStripMenu.ResumeLayout(false);
             this.toolStripMenu.PerformLayout();
             this.gbMain.ResumeLayout(false);
-            this.splitContainer1.Panel1.ResumeLayout(false);
-            this.splitContainer1.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
-            this.splitContainer1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.dgvMain)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvRelationships)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -235,7 +170,6 @@
         private System.Windows.Forms.ToolStrip toolStripMenu;
         private System.Windows.Forms.ToolStripButton tsbBack;
         private System.Windows.Forms.GroupBox gbMain;
-        private System.Windows.Forms.DataGridView dgvMain;
         private System.Windows.Forms.ToolStripLabel tslCached;
         private System.Windows.Forms.ToolStripButton tsbRefresh;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
@@ -243,8 +177,7 @@
         private System.Windows.Forms.ToolStripTextBox tsbSearch;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
-        private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.DataGridView dgvRelationships;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.FlowLayoutPanel flpMain;
     }
 }

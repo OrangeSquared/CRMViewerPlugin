@@ -15,63 +15,29 @@ using System.Dynamic;
 using XrmToolBox.Extensibility.Interfaces;
 using XrmToolBox.Extensibility.Args;
 using System.Runtime.Remoting.Contexts;
+using OrangeSquared.Xrm.CRMViewer;
+using System.Web.UI.WebControls;
+using System.Net;
 
 namespace CRMViewerPlugin
 {
     //comment
-    public partial class ctlCRMViewer : PluginControlBase, IStatusBarMessenger
+    public partial class ctlCRMViewer : PluginControlBase, IStatusBarMessenger, IXrmToolBoxPluginControl
     {
         private Settings mySettings;
-        private Stack<Result> results;
-        private DataTable activeList;
-        private Menu popupMenu;
-        private bool insetup = true;
+        private Cache mycache;
+        private List<Result> results;
 
         public event EventHandler<StatusBarMessageEventArgs> SendMessageToStatusBar;
 
-        #region cache
-        private Dictionary<string, string> _cache;
-        internal Dictionary<string, string> cache
+        #region Plugin Management
+        private void LoadSettings()
         {
-            get
-            {
-                if (_cache == null)
-                {
-                    _cache = new Dictionary<string, string>();
-                    string[] input;
-                    if (SettingsManager.Instance.TryLoad(GetType(), out input, ((Microsoft.Xrm.Tooling.Connector.CrmServiceClient)Service).ConnectedOrgUniqueName + "_cache"))
-                        for (int i = 0; i < input.GetUpperBound(0); i += 2)
-                            _cache.Add(input[i], input[i + 1]);
-                }
-                return _cache;
-            }
-        }
-        private void SaveCache()
-        {
-            List<string> output = new List<string>();
-            foreach (string s in cache.Keys)
-            {
-                output.Add(s);
-                output.Add(cache[s]);
-            }
-            SettingsManager.Instance.Save(GetType(), output.ToArray(), ((Microsoft.Xrm.Tooling.Connector.CrmServiceClient)Service).ConnectedOrgUniqueName + "_cache");
-        }
-        #endregion
-
-
-        #region plugin stuff
-        private void MyPluginControl_Load(object sender, EventArgs e)
-        {
-            insetup = true;
-            //ShowInfoNotification("This is a notification that can lead to XrmToolBox repository", new Uri("https://github.com/MscrmTools/XrmToolBox"));
-
             // Loads or creates the settings for the plugin
             if (!SettingsManager.Instance.TryLoad(GetType(), out mySettings))
             {
                 mySettings = new Settings();
-
                 LogWarning("Settings not found => a new settings file has been created!");
-
                 SettingsManager.Instance.Save(GetType(), mySettings);
             }
             else
@@ -79,13 +45,35 @@ namespace CRMViewerPlugin
                 LogInfo("Settings found and loaded");
             }
 
-            results = new Stack<Result>();
-            ExecuteMethod(LoadEntityList);
+            if (!SettingsManager.Instance.TryLoad(GetType(), out mycache, ((Microsoft.Xrm.Tooling.Connector.CrmServiceClient)Service).ConnectedOrgUniqueName + "_cache"))
+            {
+                mycache = new Cache();
+                LogWarning("Cache not found => a new cache file has been created");
+                SettingsManager.Instance.Save(GetType(), mycache.ToArray(), ((Microsoft.Xrm.Tooling.Connector.CrmServiceClient)Service).ConnectedOrgUniqueName + "_cache");
+            }
+            else
+            {
+                LogInfo("Cache found and loaded");
+            }
+        }
+        private void SaveSettings()
+        {
+            SettingsManager.Instance.Save(GetType(), mySettings);
+            SettingsManager.Instance.Save(GetType(), mycache.ToArray(), "OS." + ((Microsoft.Xrm.Tooling.Connector.CrmServiceClient)Service).ConnectedOrgUniqueName + "_cache");
         }
 
-        private void tsbClose_Click(object sender, EventArgs e) { CloseTool(); }
+        private void LoadCRMInstance()
+        {
+            results = new List<Result>();
+            ExecuteMethod(LoadEntityList);
+        }
+        #endregion
 
-        private void MyPluginControl_OnCloseTool(object sender, EventArgs e) { SettingsManager.Instance.Save(GetType(), mySettings); }
+
+        #region plugin stuff
+        private void ctlCRMViewer_Load(object sender, EventArgs e) { }
+
+        private void ctlCRMViewer_OnCloseTool(object sender, EventArgs e) { SaveSettings(); }
 
         public override void UpdateConnection(IOrganizationService newService, ConnectionDetail detail, string actionName, object parameter)
         {
@@ -95,19 +83,16 @@ namespace CRMViewerPlugin
             {
                 mySettings.LastUsedOrganizationWebappUrl = detail.WebApplicationUrl;
                 LogInfo("Connection has changed to: {0}", detail.WebApplicationUrl);
-                results = new Stack<Result>();
-                LoadEntityList();
             }
         }
+
         private void ctlCRMViewer_ConnectionUpdated(object sender, ConnectionUpdatedEventArgs e)
         {
-
+            LoadCRMInstance();
         }
-
-
         #endregion
 
-        #region Events
+        #region Async stuff
         private void ProgressChanged(ProgressChangedEventArgs progressChangedEventArgs)
         {
             SetWorkingMessage(string.Format("{0}% complete", progressChangedEventArgs.ProgressPercentage));
@@ -118,215 +103,255 @@ namespace CRMViewerPlugin
         }
 
         private void NewResultsAvailable(RunWorkerCompletedEventArgs runWorkerCompletedEventArgs) { PaintResults(); }
+        #endregion
 
-        private void tsbSearch_TextChanged(object sender, EventArgs e)
+
+        #region UI
+        private void PaintResults()
         {
-            DataTable dt = results.Peek().Data.Tables[0];
-            List<string> newFilter = new List<string>();
-            for (int i = 1; i < dt.Columns.Count; i++)
-                newFilter.Add(string.Format("[{0}] LIKE '%{1}%'", dt.Columns[i].ColumnName, tsbSearch.Text));
+            flpMain.SuspendLayout();
+            flpMain.Controls.Clear();
+            results.Add(results[0]);
+            for (int i = 0; i < results.Count; i++)
+                AddResult(results[i], i == (results.Count - 1));
 
-            dt.DefaultView.RowFilter = string.Join(" OR ", newFilter);
-            results.Peek().SearchText = tsbSearch.Text;
+            flpMain.ResumeLayout();
+            SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs(string.Format("{0} results loaded", results.Last().Data.Tables[0].Rows.Count)));
         }
 
-        private void dgvMain_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        private void AddResult(Result r, bool fullResult)
         {
-            if (e.RowIndex < 0) return;
-            NavigateIn(e.RowIndex);
+            DataGridView dataGridView = new DataGridView();
+            if (fullResult)
+                dataGridView.DataSource = r.Data.Tables[0];
+            else
+                dataGridView.DataSource = r.Data.Tables[1];
+
+            dataGridView.RowHeadersWidth = dataGridView.ColumnHeadersHeight;
+            flpMain.Controls.Add(dataGridView);
+            dataGridView.Height = flpMain.Height - 10;            
+            dataGridView.Columns["Key"].Visible = false;
+            for (int i = 1; i < dataGridView.Columns.Count; i++)
+                dataGridView.Columns[i].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            if (!fullResult)
         }
-        private void dgvRelationships_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex < 0) return;
-            WorkAsyncInfo wai = new WorkAsyncInfo
-            {
-                Message = "Retrieving info from CRM...",
-                Work = (worker, args) =>
-                {
-                    Result result = null;
-                    result = Browser.GetEntityResult(Service, cache, dgvRelationships.Rows[e.RowIndex].Cells[3].Value.ToString(), worker);
-                    if (result != null)
-                    {
-                        results.Push(result);
-                        if (!result.FromCache)
-                            SaveCache();
-                    }
-
-                },
-                ProgressChanged = ProgressChanged,
-                PostWorkCallBack = NewResultsAvailable,
-                AsyncArgument = null,
-                MessageHeight = 150,
-                MessageWidth = 340
-            };
-            WorkAsync(wai);
-        }
-
-        private void tsbBack_Click(object sender, EventArgs e) { PageBack(); }
-
-        private void dgvMain_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Escape)
-                PageBack();
-
-            else if (e.KeyCode == Keys.Enter)
-                NavigateIn(dgvMain.SelectedRows[0].Index);
-
-            else if (e.KeyCode == Keys.F2)
-                tsbSearch.Focus();
-
-            else if (e.KeyCode == Keys.F5)
-                Refresh();
-
-            else if ("ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_-".Contains(e.KeyCode.ToString()))
-            {
-                tsbSearch.Text += e.KeyCode.ToString();
-            }
-
-            e.SuppressKeyPress = true;
-        }
-
-        private void tsbRefresh_Click(object sender, EventArgs e) { Refresh(); }
+        #endregion
 
 
-        private void dgvMain_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (dgvMain.HitTest(e.X, e.Y).RowIndex >= 0)
-                dgvMain.Rows[dgvMain.HitTest(e.X, e.Y).RowIndex].Selected = true;
-        }
 
-        private void dgvMain_MouseUp(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Right)
-            {
-                MenuItem miCopyKey = new MenuItem("Copy Key");
-                miCopyKey.Click += (object ss, EventArgs ee) => Clipboard.SetText(dgvMain.SelectedRows[0].Cells[0].Value.ToString());
-                MenuItem miOpenInBrowser = new MenuItem("Open in Browser");
-                miOpenInBrowser.Click += MiOpenInBrowser_Click;
-                MenuItem miOpenRecord = new MenuItem("Open Record");
-                miOpenRecord.Click += MiOpenRecord_Click;
 
-                ContextMenu contextMenu = new ContextMenu();
 
-                switch (results.Peek().DataType)
-                {
-                    case Result.ResultType.EntityList:
-                        contextMenu = new ContextMenu(new MenuItem[]
-                            {
-                                miCopyKey,
-                                miOpenInBrowser,
-                            });
-                        break;
-                    case Result.ResultType.Entity:
-                        contextMenu = new ContextMenu(new MenuItem[]
-                            {
-                                miCopyKey,
-                                miOpenInBrowser,
-                                miOpenRecord,
-                            }); break;
-                    case Result.ResultType.PickList:
-                        contextMenu = new ContextMenu(new MenuItem[]
-                            {
-                                miCopyKey,
-                            });
-                        break;
-                    case Result.ResultType.Record:
-                        contextMenu = new ContextMenu(new MenuItem[]
-                            {
-                                miCopyKey,
-                            });
-                        break;
-                    default:
-                        break;
-                }
 
-                contextMenu.Show(dgvMain, e.Location);
-            }
+        #region Events
 
-        }
+        //private void tsbSearch_TextChanged(object sender, EventArgs e)
+        //{
+        //    DataTable dt = results.Peek().Data.Tables[0];
+        //    List<string> newFilter = new List<string>();
+        //    for (int i = 1; i < dt.Columns.Count; i++)
+        //        newFilter.Add(string.Format("[{0}] LIKE '%{1}%'", dt.Columns[i].ColumnName, tsbSearch.Text));
 
-        private void MiOpenRecord_Click(object sender, EventArgs e)
-        {
-            string possibleid = Clipboard.ContainsText() ? Clipboard.GetText() : string.Empty;
-            Guid id = Guid.Empty;
+        //    dt.DefaultView.RowFilter = string.Join(" OR ", newFilter);
+        //    results.Peek().SearchText = tsbSearch.Text;
+        //}
 
-            if (!Guid.TryParse(possibleid, out id))
-            {
-                string fetchXML = string.Format(@"<fetch top='1' >  <entity name='{0}' >    <attribute name='{0}id' />  </entity></fetch>", results.Peek().EntityLogicalName);
-                EntityCollection ec = Service.RetrieveMultiple(new FetchExpression(fetchXML));
-                if (ec.Entities.Count > 0)
-                    id = ec.Entities[0].Id;
-            }
-            if (id != Guid.Empty)
-            {
-                WorkAsyncInfo wai = new WorkAsyncInfo
-                {
-                    Message = "Retrieving info from CRM...",
-                    Work = (worker, args) =>
-                    {
-                        Result result = Browser.GetRecordResult(Service, cache, results.Peek().EntityLogicalName, id, worker);
-                        if (result != null)
-                        {
-                            results.Push(result);
-                            if (!result.FromCache)
-                                SaveCache();
-                        }
+        //private void dgvMain_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        //{
+        //    if (e.RowIndex < 0) return;
+        //    NavigateIn(e.RowIndex);
+        //}
+        //private void dgvRelationships_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        //{
+        //    if (e.RowIndex < 0) return;
+        //    WorkAsyncInfo wai = new WorkAsyncInfo
+        //    {
+        //        Message = "Retrieving info from CRM...",
+        //        Work = (worker, args) =>
+        //        {
+        //            Result result = null;
+        //            result = Browser.GetEntityResult(Service, cache, dgvRelationships.Rows[e.RowIndex].Cells[3].Value.ToString(), worker);
+        //            if (result != null)
+        //            {
+        //                results.Push(result);
+        //                if (!result.FromCache)
+        //                    SaveCache();
+        //            }
 
-                    },
-                    ProgressChanged = ProgressChanged,
-                    PostWorkCallBack = NewResultsAvailable,
-                    AsyncArgument = null,
-                    MessageHeight = 150,
-                    MessageWidth = 340
-                };
-                WorkAsync(wai);
-            }
-        }
+        //        },
+        //        ProgressChanged = ProgressChanged,
+        //        PostWorkCallBack = NewResultsAvailable,
+        //        AsyncArgument = null,
+        //        MessageHeight = 150,
+        //        MessageWidth = 340
+        //    };
+        //    WorkAsync(wai);
+        //}
 
-        private void MiOpenInBrowser_Click(object sender, EventArgs e)
-        {
-            string rootURI = string.Format("https://{0}:{1}",
-                ((Microsoft.Xrm.Tooling.Connector.CrmServiceClient)Service).CrmConnectOrgUriActual.Host,
-                ((Microsoft.Xrm.Tooling.Connector.CrmServiceClient)Service).CrmConnectOrgUriActual.Port);
-            string targetUri = null;
+        //private void tsbBack_Click(object sender, EventArgs e) { PageBack(); }
 
-            switch (results.Peek().DataType)
-            {
-                case Result.ResultType.EntityList:
-                    targetUri = string.Format("{0}//main.aspx?etn={1}&pagetype=entitylist", rootURI, dgvMain.SelectedRows[0].Cells[0].Value.ToString());
-                    break;
-                case Result.ResultType.Entity:
-                    targetUri = string.Format("{0}//main.aspx?etn={1}&pagetype=entitylist", rootURI, results.Peek().EntityLogicalName);
-                    break;
-                case Result.ResultType.PickList:
-                    break;
-                case Result.ResultType.Record:
-                    //targetUri = string.Format("{0}//main.aspx?etn={1}&pagetype=entityrecord&id={2}", rootURI, results.Peek().EntityLogicalName, recordId);
-                    break;
-                default:
-                    break;
-            }
+        //private void dgvMain_KeyDown(object sender, KeyEventArgs e)
+        //{
+        //    if (e.KeyCode == Keys.Escape)
+        //        PageBack();
 
-            System.Diagnostics.Process.Start(targetUri);
-        }
+        //    else if (e.KeyCode == Keys.Enter)
+        //        NavigateIn(dgvMain.SelectedRows[0].Index);
 
-        private void splitContainer1_SplitterMoved(object sender, SplitterEventArgs e)
-        {
-            if (mySettings != null && !insetup)
-            {
-                mySettings.SplitterPosition = splitContainer1.SplitterDistance;
-                SettingsManager.Instance.Save(GetType(), mySettings);
-            }
-        }
+        //    else if (e.KeyCode == Keys.F2)
+        //        tsbSearch.Focus();
 
-        private void ctlCRMViewer_Paint(object sender, PaintEventArgs e)
-        {
-            if (insetup)
-            {
-                splitContainer1.SplitterDistance = mySettings.SplitterPosition;
-                insetup = false;
-            }
-        }
+        //    else if (e.KeyCode == Keys.F5)
+        //        Refresh();
+
+        //    else if ("ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_-".Contains(e.KeyCode.ToString()))
+        //    {
+        //        tsbSearch.Text += e.KeyCode.ToString();
+        //    }
+
+        //    e.SuppressKeyPress = true;
+        //}
+
+        //private void tsbRefresh_Click(object sender, EventArgs e) { Refresh(); }
+
+
+        //private void dgvMain_MouseDown(object sender, MouseEventArgs e)
+        //{
+        //    if (dgvMain.HitTest(e.X, e.Y).RowIndex >= 0)
+        //        dgvMain.Rows[dgvMain.HitTest(e.X, e.Y).RowIndex].Selected = true;
+        //}
+
+        //private void dgvMain_MouseUp(object sender, MouseEventArgs e)
+        //{
+        //    if (e.Button == MouseButtons.Right)
+        //    {
+        //        MenuItem miCopyKey = new MenuItem("Copy Key");
+        //        miCopyKey.Click += (object ss, EventArgs ee) => Clipboard.SetText(dgvMain.SelectedRows[0].Cells[0].Value.ToString());
+        //        MenuItem miOpenInBrowser = new MenuItem("Open in Browser");
+        //        miOpenInBrowser.Click += MiOpenInBrowser_Click;
+        //        MenuItem miOpenRecord = new MenuItem("Open Record");
+        //        miOpenRecord.Click += MiOpenRecord_Click;
+
+        //        ContextMenu contextMenu = new ContextMenu();
+
+        //        switch (results.Peek().DataType)
+        //        {
+        //            case Result.ResultType.EntityList:
+        //                contextMenu = new ContextMenu(new MenuItem[]
+        //                    {
+        //                        miCopyKey,
+        //                        miOpenInBrowser,
+        //                    });
+        //                break;
+        //            case Result.ResultType.Entity:
+        //                contextMenu = new ContextMenu(new MenuItem[]
+        //                    {
+        //                        miCopyKey,
+        //                        miOpenInBrowser,
+        //                        miOpenRecord,
+        //                    }); break;
+        //            case Result.ResultType.PickList:
+        //                contextMenu = new ContextMenu(new MenuItem[]
+        //                    {
+        //                        miCopyKey,
+        //                    });
+        //                break;
+        //            case Result.ResultType.Record:
+        //                contextMenu = new ContextMenu(new MenuItem[]
+        //                    {
+        //                        miCopyKey,
+        //                    });
+        //                break;
+        //            default:
+        //                break;
+        //        }
+
+        //        contextMenu.Show(dgvMain, e.Location);
+        //    }
+
+        //}
+
+        //private void MiOpenRecord_Click(object sender, EventArgs e)
+        //{
+        //    string possibleid = Clipboard.ContainsText() ? Clipboard.GetText() : string.Empty;
+        //    Guid id = Guid.Empty;
+
+        //    if (!Guid.TryParse(possibleid, out id))
+        //    {
+        //        string fetchXML = string.Format(@"<fetch top='1' >  <entity name='{0}' >    <attribute name='{0}id' />  </entity></fetch>", results.Peek().EntityLogicalName);
+        //        EntityCollection ec = Service.RetrieveMultiple(new FetchExpression(fetchXML));
+        //        if (ec.Entities.Count > 0)
+        //            id = ec.Entities[0].Id;
+        //    }
+        //    if (id != Guid.Empty)
+        //    {
+        //        WorkAsyncInfo wai = new WorkAsyncInfo
+        //        {
+        //            Message = "Retrieving info from CRM...",
+        //            Work = (worker, args) =>
+        //            {
+        //                Result result = Browser.GetRecordResult(Service, cache, results.Peek().EntityLogicalName, id, worker);
+        //                if (result != null)
+        //                {
+        //                    results.Push(result);
+        //                    if (!result.FromCache)
+        //                        SaveCache();
+        //                }
+
+        //            },
+        //            ProgressChanged = ProgressChanged,
+        //            PostWorkCallBack = NewResultsAvailable,
+        //            AsyncArgument = null,
+        //            MessageHeight = 150,
+        //            MessageWidth = 340
+        //        };
+        //        WorkAsync(wai);
+        //    }
+        //}
+
+        //private void MiOpenInBrowser_Click(object sender, EventArgs e)
+        //{
+        //    string rootURI = string.Format("https://{0}:{1}",
+        //        ((Microsoft.Xrm.Tooling.Connector.CrmServiceClient)Service).CrmConnectOrgUriActual.Host,
+        //        ((Microsoft.Xrm.Tooling.Connector.CrmServiceClient)Service).CrmConnectOrgUriActual.Port);
+        //    string targetUri = null;
+
+        //    switch (results.Peek().DataType)
+        //    {
+        //        case Result.ResultType.EntityList:
+        //            targetUri = string.Format("{0}//main.aspx?etn={1}&pagetype=entitylist", rootURI, dgvMain.SelectedRows[0].Cells[0].Value.ToString());
+        //            break;
+        //        case Result.ResultType.Entity:
+        //            targetUri = string.Format("{0}//main.aspx?etn={1}&pagetype=entitylist", rootURI, results.Peek().EntityLogicalName);
+        //            break;
+        //        case Result.ResultType.PickList:
+        //            break;
+        //        case Result.ResultType.Record:
+        //            //targetUri = string.Format("{0}//main.aspx?etn={1}&pagetype=entityrecord&id={2}", rootURI, results.Peek().EntityLogicalName, recordId);
+        //            break;
+        //        default:
+        //            break;
+        //    }
+
+        //    System.Diagnostics.Process.Start(targetUri);
+        //}
+
+        //private void splitContainer1_SplitterMoved(object sender, SplitterEventArgs e)
+        //{
+        //    if (mySettings != null && !insetup)
+        //    {
+        //        mySettings.SplitterPosition = splitContainer1.SplitterDistance;
+        //        SettingsManager.Instance.Save(GetType(), mySettings);
+        //    }
+        //}
+
+        //private void ctlCRMViewer_Paint(object sender, PaintEventArgs e)
+        //{
+        //    if (insetup)
+        //    {
+        //        splitContainer1.SplitterDistance = mySettings.SplitterPosition;
+        //        insetup = false;
+        //    }
+        //}
 
         #endregion
 
@@ -341,7 +366,7 @@ namespace CRMViewerPlugin
                     Result result = Browser.GetEntityListResult(Service, worker);
 
                     if (result != null)
-                        results.Push(result);
+                        results.Add(result);
                 },
                 ProgressChanged = ProgressChanged,
                 PostWorkCallBack = NewResultsAvailable,
@@ -352,44 +377,12 @@ namespace CRMViewerPlugin
             WorkAsync(wai);
         }
 
-        private void PaintResults()
-        {
-            activeList = results.Peek().Data.Tables[0];
-            tslCached.Visible = results.Peek().FromCache;
-
-            List<string> header = new List<string>();
-            foreach (Result r in results)
-                header.Add(r.Header);
-            gbMain.Text = string.Join(" <= ", header);
-
-            dgvMain.DataSource = activeList;
-
-            dgvMain.Columns["Key"].Visible = false;
-            dgvMain.RowHeadersWidth = dgvMain.ColumnHeadersHeight;
-            string search = results.Peek().SearchText;
-            tsbSearch.Text = "";
-            tsbSearch.Text = search;
-
-            if (results.Peek().Data.Tables.Count > 1)
-            {
-                DataTable det = results.Peek().Data.Tables[1];
-                dgvRelationships.DataSource = det;
-                dgvRelationships.Columns["key"].Visible = false;
-                dgvRelationships.RowHeadersWidth = dgvRelationships.ColumnHeadersHeight;
-            }
-            else
-            {
-                dgvRelationships.DataSource = null;
-            }
-
-            SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs(string.Format("{0} results loaded", dgvMain.Rows.Count)));
-        }
 
         private void PageBack()
         {
             if (results.Count > 1)
             {
-                results.Pop();
+                results.RemoveAt(results.Count - 1);
                 PaintResults();
             }
         }
@@ -399,98 +392,101 @@ namespace CRMViewerPlugin
         public ctlCRMViewer()
         {
             InitializeComponent();
-            results = new Stack<Result>();
         }
 
 
         #region Navigation
-        private void NavigateIn(int row)
-        {
-            WorkAsyncInfo wai = new WorkAsyncInfo
-            {
-                Message = "Retrieving info from CRM...",
-                Work = (worker, args) =>
-                {
-                    Result result = null;
+        //private void NavigateIn(int row)
+        //{
+        //    WorkAsyncInfo wai = new WorkAsyncInfo
+        //    {
+        //        Message = "Retrieving info from CRM...",
+        //        Work = (worker, args) =>
+        //        {
+        //            Result result = null;
 
-                    switch (results.Peek().DataType)
-                    {
-                        case Result.ResultType.EntityList:
-                            result = Browser.GetEntityResult(Service, cache, dgvMain.Rows[row].Cells[0].Value.ToString(), worker);
-                            break;
-                        case Result.ResultType.Entity:
-                            string datatype = dgvMain.Rows[row].Cells[4].Value.ToString();
-                            if (datatype == "Picklist")
-                                result = Browser.GetPicklistResult(Service, results.Peek().EntityLogicalName, dgvMain.Rows[row].Cells[0].Value.ToString(), worker);
-                            else if (datatype == "Lookup")
-                                result = Browser.GetEntityResult(Service, cache, dgvMain.Rows[row].Cells[5].Value.ToString(), worker);
-                            break;
-                        case Result.ResultType.PickList:
-                            break;
-                        case Result.ResultType.Record:
-                            break;
-                        default:
-                            break;
-                    }
-                    if (result != null)
-                    {
-                        results.Push(result);
-                        if (!result.FromCache)
-                            SaveCache();
-                    }
+        //            switch (results.Peek().DataType)
+        //            {
+        //                case Result.ResultType.EntityList:
+        //                    result = Browser.GetEntityResult(Service, cache, dgvMain.Rows[row].Cells[0].Value.ToString(), worker);
+        //                    break;
+        //                case Result.ResultType.Entity:
+        //                    string datatype = dgvMain.Rows[row].Cells[4].Value.ToString();
+        //                    if (datatype == "Picklist")
+        //                        result = Browser.GetPicklistResult(Service, results.Peek().EntityLogicalName, dgvMain.Rows[row].Cells[0].Value.ToString(), worker);
+        //                    else if (datatype == "Lookup")
+        //                        result = Browser.GetEntityResult(Service, cache, dgvMain.Rows[row].Cells[5].Value.ToString(), worker);
+        //                    break;
+        //                case Result.ResultType.PickList:
+        //                    break;
+        //                case Result.ResultType.Record:
+        //                    break;
+        //                default:
+        //                    break;
+        //            }
+        //            if (result != null)
+        //            {
+        //                results.Push(result);
+        //                if (!result.FromCache)
+        //                    SaveCache();
+        //            }
 
-                },
-                ProgressChanged = ProgressChanged,
-                PostWorkCallBack = NewResultsAvailable,
-                AsyncArgument = null,
-                MessageHeight = 150,
-                MessageWidth = 340
-            };
-            WorkAsync(wai);
-        }
+        //        },
+        //        ProgressChanged = ProgressChanged,
+        //        PostWorkCallBack = NewResultsAvailable,
+        //        AsyncArgument = null,
+        //        MessageHeight = 150,
+        //        MessageWidth = 340
+        //    };
+        //    WorkAsync(wai);
+        //}
 
-        private void Refresh()
-        {
-            Result r = results.Peek();
-            Result newResult = null;
-            WorkAsyncInfo wai = new WorkAsyncInfo
-            {
-                Message = "Retrieving info from CRM...",
-                Work = (worker, args) =>
-                {
+        //private void Refresh()
+        //{
+        //    Result r = results.Peek();
+        //    Result newResult = null;
+        //    WorkAsyncInfo wai = new WorkAsyncInfo
+        //    {
+        //        Message = "Retrieving info from CRM...",
+        //        Work = (worker, args) =>
+        //        {
 
-                    switch (r.DataType)
-                    {
-                        case Result.ResultType.EntityList:
-                            newResult = Browser.GetEntityListResult(Service, worker);
-                            newResult.SearchText = r.SearchText;
-                            break;
-                        case Result.ResultType.Entity:
-                            cache.Remove(r.Key);
-                            newResult = Browser.GetEntityResult(Service, cache, r.Key, worker);
-                            newResult.SearchText = r.SearchText;
-                            break;
-                        case Result.ResultType.PickList:
-                            break;
-                        case Result.ResultType.Record:
-                            break;
-                        default:
-                            break;
-                    }
-                    if (newResult != null)
-                    {
-                        results.Pop();
-                        results.Push(newResult);
-                    }
-                },
-                ProgressChanged = ProgressChanged,
-                PostWorkCallBack = NewResultsAvailable,
-                AsyncArgument = null,
-                MessageHeight = 150,
-                MessageWidth = 340
-            };
-            WorkAsync(wai);
-        }
+        //            switch (r.DataType)
+        //            {
+        //                case Result.ResultType.EntityList:
+        //                    newResult = Browser.GetEntityListResult(Service, worker);
+        //                    newResult.SearchText = r.SearchText;
+        //                    break;
+        //                case Result.ResultType.Entity:
+        //                    cache.Remove(r.Key);
+        //                    newResult = Browser.GetEntityResult(Service, cache, r.Key, worker);
+        //                    newResult.SearchText = r.SearchText;
+        //                    break;
+        //                case Result.ResultType.PickList:
+        //                    break;
+        //                case Result.ResultType.Record:
+        //                    break;
+        //                default:
+        //                    break;
+        //            }
+        //            if (newResult != null)
+        //            {
+        //                results.Pop();
+        //                results.Push(newResult);
+        //            }
+        //        },
+        //        ProgressChanged = ProgressChanged,
+        //        PostWorkCallBack = NewResultsAvailable,
+        //        AsyncArgument = null,
+        //        MessageHeight = 150,
+        //        MessageWidth = 340
+        //    };
+        //    WorkAsync(wai);
+        //}
+
+
+
+
 
 
         #endregion
