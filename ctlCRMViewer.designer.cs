@@ -33,8 +33,6 @@
             this.toolStripMenu = new System.Windows.Forms.ToolStrip();
             this.tsbBack = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.stbCustomFields = new System.Windows.Forms.ToolStripButton();
-            this.tssSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.tslCached = new System.Windows.Forms.ToolStripLabel();
             this.tsbRefresh = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -62,8 +60,6 @@
             this.toolStripMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsbBack,
             this.toolStripSeparator3,
-            this.stbCustomFields,
-            this.tssSeparator1,
             this.tslCached,
             this.tsbRefresh,
             this.toolStripSeparator1,
@@ -88,20 +84,6 @@
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
             this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
-            // 
-            // stbCustomFields
-            // 
-            this.stbCustomFields.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.stbCustomFields.Image = ((System.Drawing.Image)(resources.GetObject("stbCustomFields.Image")));
-            this.stbCustomFields.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.stbCustomFields.Name = "stbCustomFields";
-            this.stbCustomFields.Size = new System.Drawing.Size(81, 22);
-            this.stbCustomFields.Text = "Show Default";
-            // 
-            // tssSeparator1
-            // 
-            this.tssSeparator1.Name = "tssSeparator1";
-            this.tssSeparator1.Size = new System.Drawing.Size(6, 25);
             // 
             // tslCached
             // 
@@ -252,7 +234,6 @@
         #endregion
         private System.Windows.Forms.ToolStrip toolStripMenu;
         private System.Windows.Forms.ToolStripButton tsbBack;
-        private System.Windows.Forms.ToolStripSeparator tssSeparator1;
         private System.Windows.Forms.GroupBox gbMain;
         private System.Windows.Forms.DataGridView dgvMain;
         private System.Windows.Forms.ToolStripLabel tslCached;
@@ -262,7 +243,6 @@
         private System.Windows.Forms.ToolStripTextBox tsbSearch;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
-        private System.Windows.Forms.ToolStripButton stbCustomFields;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.DataGridView dgvRelationships;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
