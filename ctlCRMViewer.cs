@@ -18,6 +18,7 @@ using System.Runtime.Remoting.Contexts;
 using OrangeSquared.Xrm.CRMViewer;
 using System.Web.UI.WebControls;
 using System.Net;
+using System.Activities.XamlIntegration;
 
 namespace CRMViewerPlugin
 {
@@ -102,38 +103,87 @@ namespace CRMViewerPlugin
             SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs(progressChangedEventArgs.ProgressPercentage, "Loading" + new string('.', tic)));
         }
 
-        private void NewResultsAvailable(RunWorkerCompletedEventArgs runWorkerCompletedEventArgs) { PaintResults(); }
+        private void NewResultsAvailable(RunWorkerCompletedEventArgs runWorkerCompletedEventArgs)
+        {
+            results.Add(results[0]);
+            results.Add(results[0]);
+            results.Add(results[0]);
+
+            PaintResults();
+        }
         #endregion
 
 
         #region UI
         private void PaintResults()
         {
-            flpMain.SuspendLayout();
-            flpMain.Controls.Clear();
-            results.Add(results[0]);
-            for (int i = 0; i < results.Count; i++)
-                AddResult(results[i], i == (results.Count - 1));
+            gbMain.SuspendLayout();
+            gbMain.Controls.Clear();
+            DataGridView dataGridView;
+            //if there's only one result then don't mess with splitters
+            if (results.Count == 1)
+            {
+                dataGridView = new DataGridView();
+                gbMain.Controls.Add(dataGridView);
+                SetupGridView(dataGridView, false, results[0]);
+            }
+            else
+            {
+                //first splitcontainer is the one that will have the last result in the right pane
+                List<SplitContainer> splitContainers = new List<SplitContainer>();
+                bool displayResult = true;
+                for (int i = results.Count - 1; i >= 0; i--)
+                {
+                    if (i > 0)
+                    {
+                        SplitContainer splitContainer = new SplitContainer();
+                        if (splitContainers.Count == 0)
+                            gbMain.Controls.Add(splitContainer);
+                        else
+                            splitContainers.Last().Panel1.Controls.Add(splitContainer);
 
-            flpMain.ResumeLayout();
+                        splitContainers.Add(splitContainer);
+                        splitContainer.Dock = DockStyle.Fill;
+                        dataGridView = new DataGridView();
+                        if (i > 0)
+                            splitContainer.Panel2.Controls.Add(dataGridView);
+                        else
+                            splitContainer.Panel1.Controls.Add(dataGridView);
+                        SetupGridView(dataGridView, !displayResult, results[i]);
+                    }
+                    else
+                    {
+                        dataGridView = new DataGridView();
+                        splitContainers.Last().Panel1.Controls.Add(dataGridView);
+                        SetupGridView(dataGridView, !displayResult, results[i]);
+                    }
+                    //initial sizing
+                    //if (displayResult)
+                    //    dataGridView.Width = dataGridView.RowHeadersWidth + dataGridView.Columns[1].Width + 19;
+                    //else
+                    //    dataGridView.Width = (flpMain.Width - 100) - dataGridView.Left;
+
+                    displayResult = false;
+                }
+            }
+
+            gbMain.ResumeLayout();
             SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs(string.Format("{0} results loaded", results.Last().Data.Tables[0].Rows.Count)));
         }
 
-        private void AddResult(Result r, bool fullResult)
+        private void SetupGridView(DataGridView dataGridView, bool useSummary, Result result)
         {
-            DataGridView dataGridView = new DataGridView();
-            if (fullResult)
-                dataGridView.DataSource = r.Data.Tables[0];
+            if (useSummary)
+                dataGridView.DataSource = result.Data.Tables[1];
             else
-                dataGridView.DataSource = r.Data.Tables[1];
+                dataGridView.DataSource = result.Data.Tables[0];
 
-            dataGridView.RowHeadersWidth = dataGridView.ColumnHeadersHeight;
-            flpMain.Controls.Add(dataGridView);
-            dataGridView.Height = flpMain.Height - 10;            
-            dataGridView.Columns["Key"].Visible = false;
-            for (int i = 1; i < dataGridView.Columns.Count; i++)
-                dataGridView.Columns[i].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
-            if (!fullResult)
+            //dataGridView.Columns["Key"].Visible = false;
+
+            for (int col = 1; col < dataGridView.Columns.Count; col++)
+                dataGridView.Columns[col].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+
+            dataGridView.Dock = DockStyle.Fill;
         }
         #endregion
 

@@ -40,10 +40,8 @@
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.gbMain = new System.Windows.Forms.GroupBox();
-            this.flpMain = new System.Windows.Forms.FlowLayoutPanel();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.toolStripMenu.SuspendLayout();
-            this.gbMain.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStripMenu
@@ -125,22 +123,12 @@
             this.gbMain.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.gbMain.Controls.Add(this.flpMain);
             this.gbMain.Location = new System.Drawing.Point(3, 28);
             this.gbMain.Name = "gbMain";
             this.gbMain.Size = new System.Drawing.Size(1122, 405);
             this.gbMain.TabIndex = 6;
             this.gbMain.TabStop = false;
             this.gbMain.Text = "gbMain";
-            // 
-            // flpMain
-            // 
-            this.flpMain.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flpMain.Location = new System.Drawing.Point(3, 16);
-            this.flpMain.Name = "flpMain";
-            this.flpMain.Size = new System.Drawing.Size(1116, 386);
-            this.flpMain.TabIndex = 0;
-            this.flpMain.WrapContents = false;
             // 
             // contextMenuStrip1
             // 
@@ -160,7 +148,6 @@
             this.Load += new System.EventHandler(this.ctlCRMViewer_Load);
             this.toolStripMenu.ResumeLayout(false);
             this.toolStripMenu.PerformLayout();
-            this.gbMain.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -178,6 +165,5 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
-        private System.Windows.Forms.FlowLayoutPanel flpMain;
     }
 }
