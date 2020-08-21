@@ -420,12 +420,13 @@ namespace CRMViewerPlugin
                             break;
                         case Result.ResultType.Entity:
                             string datatype = dgvMain.Rows[row].Cells[4].Value.ToString();
-                            if (datatype == "Picklist")
+                            if (datatype == "Picklist" || datatype == "State" || datatype == "Status")
                                 result = Browser.GetPicklistResult(Service, results.Peek().EntityLogicalName, dgvMain.Rows[row].Cells[0].Value.ToString(), worker);
                             else if (datatype == "Lookup")
                                 result = Browser.GetEntityResult(Service, cache, dgvMain.Rows[row].Cells[5].Value.ToString(), worker);
                             break;
                         case Result.ResultType.PickList:
+
                             break;
                         case Result.ResultType.Record:
                             break;
