@@ -286,7 +286,7 @@ namespace CRMViewerPlugin
         private void MiOpenInBrowser_Click(object sender, EventArgs e)
         {
             string rootURI = string.Format("https://{0}:{1}",
-                ((Microsoft.Xrm.Tooling.Connector.CrmServiceClient)Service).CrmConnectOrgUriActual.Host,
+                ((Microsoft.Xrm.Tooling.Connector.CrmServiceClient)Service).CrmConnectOrgUriActual.Host.Replace("api.",""),
                 ((Microsoft.Xrm.Tooling.Connector.CrmServiceClient)Service).CrmConnectOrgUriActual.Port);
             string targetUri = null;
 
