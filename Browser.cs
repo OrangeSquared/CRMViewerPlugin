@@ -77,15 +77,15 @@ namespace CRMViewerPlugin
             Console.WriteLine(string.Format("\r\nLoading {0} entities", max));
             foreach (EntityMetadata e in subset)
             {
-                if (e.IsCustomizable.Value && e.DisplayName.LocalizedLabels.Count > 0)
-                {
+                //if (e.IsCustomizable.Value && e.DisplayName.LocalizedLabels.Count > 0)
+                //{
                     DataRow newDR = Data.NewRow();
                     newDR[0] = e.LogicalName;
                     newDR[1] = e.LogicalName;
                     newDR[2] = e.DisplayName.LocalizedLabels.Count > 0 ? e.DisplayName.LocalizedLabels.First(x => x.LanguageCode == 1033).Label : e.LogicalName;
                     Data.Rows.Add(newDR);
                     //Util.ShowProgress(pos++, max);
-                }
+                //}
                 worker.ReportProgress((int)(100 * ((double)pos++ / (double)max)));
             }
             Data.DefaultView.Sort = "Key ASC";
