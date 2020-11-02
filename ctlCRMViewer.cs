@@ -15,6 +15,7 @@ using System.Dynamic;
 using XrmToolBox.Extensibility.Interfaces;
 using XrmToolBox.Extensibility.Args;
 using System.Runtime.Remoting.Contexts;
+using System.Security.Cryptography.X509Certificates;
 
 namespace CRMViewerPlugin
 {
@@ -205,6 +206,8 @@ namespace CRMViewerPlugin
                 miOpenInBrowser.Click += MiOpenInBrowser_Click;
                 MenuItem miOpenRecord = new MenuItem("Open Record");
                 miOpenRecord.Click += MiOpenRecord_Click;
+                MenuItem miCreateEnum = new MenuItem("Create Enum");
+                miCreateEnum.Click += MiCreateEnum_Click;
 
                 ContextMenu contextMenu = new ContextMenu();
 
@@ -228,6 +231,7 @@ namespace CRMViewerPlugin
                         contextMenu = new ContextMenu(new MenuItem[]
                             {
                                 miCopyKey,
+                                miCreateEnum,
                             });
                         break;
                     case Result.ResultType.Record:
@@ -243,6 +247,23 @@ namespace CRMViewerPlugin
                 contextMenu.Show(dgvMain, e.Location);
             }
 
+        }
+
+        private void MiCreateEnum_Click(object sender, EventArgs e)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("    public enum Enum" + results.Peek().Key);
+            sb.AppendLine("        {");
+            for (int i = 0; i < dgvMain.Rows.Count; i++)
+            {
+                string name = dgvMain.Rows[i].Cells[2].Value.ToString();
+                name = name.Replace(" ", "_");
+                string number = dgvMain.Rows[i].Cells[1].Value.ToString();
+                sb.AppendLine(string.Format("            {0} = {1},", name, number));
+            }
+            sb.AppendLine("        }");
+
+            Clipboard.SetText(sb.ToString());
         }
 
         private void MiOpenRecord_Click(object sender, EventArgs e)
