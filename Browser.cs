@@ -79,17 +79,36 @@ namespace CRMViewerPlugin
             {
                 //if (e.IsCustomizable.Value && e.DisplayName.LocalizedLabels.Count > 0)
                 //{
-                    DataRow newDR = Data.NewRow();
-                    newDR[0] = e.LogicalName;
-                    newDR[1] = e.LogicalName;
-                    newDR[2] = e.DisplayName.LocalizedLabels.Count > 0 ? e.DisplayName.LocalizedLabels.First(x => x.LanguageCode == 1033).Label : e.LogicalName;
-                    Data.Rows.Add(newDR);
-                    //Util.ShowProgress(pos++, max);
+                DataRow newDR = Data.NewRow();
+                newDR[0] = e.LogicalName;
+                newDR[1] = e.LogicalName;
+                newDR[2] = e.DisplayName.LocalizedLabels.Count > 0 ? e.DisplayName.LocalizedLabels.First(x => x.LanguageCode == 1033).Label : e.LogicalName;
+                Data.Rows.Add(newDR);
+                //Util.ShowProgress(pos++, max);
                 //}
                 worker.ReportProgress((int)(100 * ((double)pos++ / (double)max)));
             }
             Data.DefaultView.Sort = "Key ASC";
             retVal.Header = string.Format("{0} Entities", Data.Rows.Count);
+
+            return retVal;
+        }
+
+        internal static List<Tuple<string, string>> GetEntityAttributes(IOrganizationService service, string entityLogicalName)
+        {
+            List<Tuple<string, string>> retVal = new List<Tuple<string, string>>();
+
+            RetrieveEntityRequest request = new RetrieveEntityRequest()
+            {
+                EntityFilters = EntityFilters.Attributes | EntityFilters.Relationships,
+                RetrieveAsIfPublished = true,
+                LogicalName = entityLogicalName
+            };
+            RetrieveEntityResponse response = (RetrieveEntityResponse)service.Execute(request);
+
+            foreach (AttributeMetadata am in response.EntityMetadata.Attributes)
+                if (am.DisplayName.LocalizedLabels.Count > 0 && !defaultAttributes.Contains(am.LogicalName))
+                    retVal.Add(new Tuple<string, string>(am.LogicalName, am.AttributeType.ToString()));
 
             return retVal;
         }
@@ -273,6 +292,33 @@ namespace CRMViewerPlugin
             memoryStream.Dispose();
         }
 
+        internal static List<Tuple<string,int>> GetPicklistValues(IOrganizationService service, string entityLogicalName, string attributeLogicalName)
+        {
+            List<Tuple<string, int>> retVal = new List<Tuple<string, int>>();
+
+            RetrieveAttributeRequest rar = new RetrieveAttributeRequest()
+            {
+                EntityLogicalName = entityLogicalName,
+                LogicalName = attributeLogicalName,
+                RetrieveAsIfPublished = true
+            };
+            RetrieveAttributeResponse rarr = (RetrieveAttributeResponse)service.Execute(rar);
+
+
+            if (rarr.AttributeMetadata.GetType().Name == "PicklistAttributeMetadata")
+                foreach (OptionMetadata om in ((PicklistAttributeMetadata)rarr.AttributeMetadata).OptionSet.Options)
+                    retVal.Add(new Tuple<string,int>( om.Label.LocalizedLabels[0].Label, om.Value.Value));
+
+            else if (rarr.AttributeMetadata.GetType().Name == "StateAttributeMetadata")
+                foreach (OptionMetadata om in ((StateAttributeMetadata)rarr.AttributeMetadata).OptionSet.Options)
+                    retVal.Add(new Tuple<string, int>(om.Label.LocalizedLabels[0].Label, om.Value.Value));
+
+            else if (rarr.AttributeMetadata.GetType().Name == "StatusAttributeMetadata")
+                foreach (OptionMetadata om in ((StatusAttributeMetadata)rarr.AttributeMetadata).OptionSet.Options)
+                    retVal.Add(new Tuple<string, int>(om.Label.LocalizedLabels[0].Label, om.Value.Value));
+
+            return retVal;
+        }
 
         internal static Result GetPicklistResult(IOrganizationService service, string entityLogicalName, string attributeLogicalName, BackgroundWorker worker)
         {
