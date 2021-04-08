@@ -216,6 +216,8 @@ namespace CRMViewerPlugin
                 miCreateEnum.Click += MiCreateEnum_Click;
                 MenuItem miCreateClass = new MenuItem("Create Class");
                 miCreateClass.Click += MiCreateClass_Click;
+                MenuItem miDocumentEntity = new MenuItem("Document Entity");
+                miDocumentEntity.Click += MiDocumentEntity_Click;
 
                 ContextMenu contextMenu = new ContextMenu();
 
@@ -227,6 +229,7 @@ namespace CRMViewerPlugin
                                 miCopyKey,
                                 miOpenInBrowser,
                                 miCreateClass,
+                                miDocumentEntity,
                             });
                         break;
                     case Result.ResultType.Entity:
@@ -262,6 +265,40 @@ namespace CRMViewerPlugin
 
         }
 
+        private void MiDocumentEntity_Click(object sender, EventArgs e)
+        {
+            WorkAsyncInfo wai = new WorkAsyncInfo
+            {
+                Message = "Documenting entity...",
+                Work = (worker, args) =>
+                {
+                    StringBuilder sb = new StringBuilder();
+                    string entityLogicalName = dgvMain.SelectedRows[0].Cells[0].Value.ToString();
+                    string entityDisplayName = dgvMain.SelectedRows[0].Cells[2].Value.ToString();
+                    List<Tuple<string, string, string>> attributes = Browser.GetEntityAttributes(Service, entityLogicalName);
+
+                    sb.AppendLine(string.Format("Entity Logical Name\t{0}", entityLogicalName));
+                    sb.AppendLine(string.Format("Entity Display Name\t{0}", entityDisplayName));
+                    sb.AppendLine("");
+                    sb.AppendLine("Attributes");
+                    sb.AppendLine("Logical Name\tDisplay Name\tType");
+
+                    attributes.Sort((x, y) => x.Item1.CompareTo(y.Item1));
+
+                    foreach (Tuple<string, string, string> att in attributes)
+                        sb.AppendLine(string.Format("{0}\t{1}\t{2}", att.Item1, att.Item3, att.Item2));
+
+                    args.Result = sb.ToString();
+                },
+                ProgressChanged = ProgressChanged,
+                PostWorkCallBack = NewResultsAvailable,
+                AsyncArgument = null,
+                MessageHeight = 150,
+                MessageWidth = 340
+            };
+            WorkAsync(wai);
+        }
+
         private void MiCreateClass_Click(object sender, EventArgs e)
         {
             WorkAsyncInfo wai = new WorkAsyncInfo
@@ -271,7 +308,7 @@ namespace CRMViewerPlugin
                 {
                     StringBuilder sb = new StringBuilder();
                     string entityLogicalName = dgvMain.SelectedRows[0].Cells[0].Value.ToString();
-                    List<Tuple<string, string>> attributes = Browser.GetEntityAttributes(Service, entityLogicalName);
+                    List<Tuple<string, string, string>> attributes = Browser.GetEntityAttributes(Service, entityLogicalName);
 
                     sb.AppendLine(string.Format(@"
 
@@ -300,7 +337,7 @@ private void SetOptionSetValue(string attributeLogicalName, object value)
                     attributes.Sort((x, y) => x.Item1.CompareTo(y.Item1));
 
                     sb.AppendLine("        #region enums");
-                    foreach (Tuple<string, string> att in attributes)
+                    foreach (Tuple<string, string, string> att in attributes)
                         if (att.Item2 == "Picklist" || att.Item2 == "Status")
                         {
                             List<Tuple<string, int>> ovs = Browser.GetPicklistValues(Service, entityLogicalName, att.Item1);
@@ -312,7 +349,7 @@ private void SetOptionSetValue(string attributeLogicalName, object value)
                     sb.AppendLine("        #endregion");
 
                     sb.AppendLine("        #region attributes");
-                    foreach (Tuple<string, string> att in attributes)
+                    foreach (Tuple<string, string, string> att in attributes)
                         if (att.Item2 == "Picklist" ||
                             att.Item2 == "Status")
                             sb.AppendLine(string.Format(@"public {0}_{1}_values {1} {{ get {{ return ({0}_{1}_values)GetOptionSetValue(""{1}""); }} set {{ SetOptionSetValue(""{1}"", value); }} }}"
