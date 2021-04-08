@@ -133,6 +133,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Browser.cs" />
+    <Compile Include="OptionSets.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="ctlCRMViewer.cs">
       <SubType>UserControl</SubType>
@@ -161,6 +162,7 @@
       xcopy "$(TargetDir)$(TargetFileName)" "$(TargetDir)Plugins\" /Y
       xcopy "$(TargetDir)$(TargetFileName)" "$(TargetDir)Plugins\" /Y
       xcopy "$(TargetDir)$(TargetFileName)" "%25appdata%25\MscrmTools\XrmToolBox\Plugins\" /Y
+      xcopy "$(TargetDir)$(TargetFileName)" "\\dhw0008fil01\DHWTransformProjects\ESPI\FetchXMLPlugins\" /Y
       )</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
