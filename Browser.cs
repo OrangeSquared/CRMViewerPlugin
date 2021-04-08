@@ -94,9 +94,9 @@ namespace CRMViewerPlugin
             return retVal;
         }
 
-        internal static List<Tuple<string, string>> GetEntityAttributes(IOrganizationService service, string entityLogicalName)
+        internal static List<Tuple<string, string, string>> GetEntityAttributes(IOrganizationService service, string entityLogicalName)
         {
-            List<Tuple<string, string>> retVal = new List<Tuple<string, string>>();
+            List<Tuple<string, string, string>> retVal = new List<Tuple<string, string, string>>();
 
             RetrieveEntityRequest request = new RetrieveEntityRequest()
             {
@@ -108,7 +108,7 @@ namespace CRMViewerPlugin
 
             foreach (AttributeMetadata am in response.EntityMetadata.Attributes)
                 if (am.DisplayName.LocalizedLabels.Count > 0 && !defaultAttributes.Contains(am.LogicalName))
-                    retVal.Add(new Tuple<string, string>(am.LogicalName, am.AttributeType.ToString()));
+                    retVal.Add(new Tuple<string, string, string>(am.LogicalName, am.AttributeType.ToString(), am.DisplayName.LocalizedLabels[0].Label));
 
             return retVal;
         }
@@ -292,7 +292,7 @@ namespace CRMViewerPlugin
             memoryStream.Dispose();
         }
 
-        internal static List<Tuple<string,int>> GetPicklistValues(IOrganizationService service, string entityLogicalName, string attributeLogicalName)
+        internal static List<Tuple<string, int>> GetPicklistValues(IOrganizationService service, string entityLogicalName, string attributeLogicalName)
         {
             List<Tuple<string, int>> retVal = new List<Tuple<string, int>>();
 
@@ -307,7 +307,7 @@ namespace CRMViewerPlugin
 
             if (rarr.AttributeMetadata.GetType().Name == "PicklistAttributeMetadata")
                 foreach (OptionMetadata om in ((PicklistAttributeMetadata)rarr.AttributeMetadata).OptionSet.Options)
-                    retVal.Add(new Tuple<string,int>( om.Label.LocalizedLabels[0].Label, om.Value.Value));
+                    retVal.Add(new Tuple<string, int>(om.Label.LocalizedLabels[0].Label, om.Value.Value));
 
             else if (rarr.AttributeMetadata.GetType().Name == "StateAttributeMetadata")
                 foreach (OptionMetadata om in ((StateAttributeMetadata)rarr.AttributeMetadata).OptionSet.Options)
