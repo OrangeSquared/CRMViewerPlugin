@@ -134,7 +134,7 @@ namespace CRMViewerPlugin
             retVal.FromCache = cache.ContainsKey(entityLogicalName);
             if (retVal.FromCache)
             {
-                LoadFromCache(retVal, cache[entityLogicalName]);
+                EntityTools.LoadFromCache(retVal, cache[entityLogicalName]);
                 retVal.Data.Tables[0].DefaultView.Sort = "Key ASC";
             }
             else
@@ -282,15 +282,7 @@ namespace CRMViewerPlugin
             return retVal;
         }
 
-        internal static void LoadFromCache(Result result, string cacheString)
-        {
-            byte[] ba = Encoding.ASCII.GetBytes(cacheString);
-            MemoryStream memoryStream = new MemoryStream(ba);
-            result.Data = new DataSet();
-            result.Data.ReadXml(memoryStream);
-            memoryStream.Close();
-            memoryStream.Dispose();
-        }
+        
 
         internal static List<Tuple<string, int>> GetPicklistValues(IOrganizationService service, string entityLogicalName, string attributeLogicalName)
         {
@@ -386,7 +378,12 @@ namespace CRMViewerPlugin
             return retVal;
         }
 
-        internal static Result GetRecordResult(IOrganizationService service, Dictionary<string, string> cache, string entityLogicalName, Guid recordId, BackgroundWorker worker)
+        internal static Result GetRecordResult(
+            IOrganizationService service,
+            Dictionary<string, string> cache,
+            string entityLogicalName,
+            Guid recordId,
+            BackgroundWorker worker)
         {
             Result retVal = new Result();
             retVal.EntityLogicalName = entityLogicalName;
@@ -453,7 +450,7 @@ namespace CRMViewerPlugin
                     dr[2] = edr[2];
                     dr[3] = edr[4];
                     if (entity.Contains((string)edr[1]))
-                        dr[4] = EntityValueFormat(service, entity, (string)edr[1]);
+                        dr[4] = EntityValueFormat(service, entity, (string)edr[1], cache);
 
 
 
@@ -500,7 +497,7 @@ namespace CRMViewerPlugin
             return retVal;
         }
 
-        internal static string EntityValueFormat(IOrganizationService service, Entity entity, string AttributeLogicalName)
+        internal static string EntityValueFormat(IOrganizationService service, Entity entity, string AttributeLogicalName, Dictionary<string, string> cache)
         {
             switch (entity.Attributes[AttributeLogicalName].GetType().Name)
             {
@@ -511,7 +508,7 @@ namespace CRMViewerPlugin
                 case "DateTime": return entity.GetAttributeValue<DateTime>(AttributeLogicalName).ToString("yyyy-MM-ddTHH:mm:ss"); break;
                 case "Guid": return entity.GetAttributeValue<Guid>(AttributeLogicalName).ToString(); break;
                 case "OptionSetValue":
-                    return GetOptionSetValue(service, entity.LogicalName, AttributeLogicalName, entity.GetAttributeValue<OptionSetValue>(AttributeLogicalName).Value);
+                    return OptionSetTools.GetOptionSetValue(service, entity.LogicalName, AttributeLogicalName, entity.GetAttributeValue<OptionSetValue>(AttributeLogicalName).Value, cache);
                     break;
 
                 case "EntityReference":
@@ -528,34 +525,7 @@ namespace CRMViewerPlugin
             }
         }
 
-        private static string GetOptionSetValue(IOrganizationService service, string Entity, string Attribute, int Value)
-        {
 
-            string retVal = "UNKNOWN.";
-
-            RetrieveAttributeRequest rar = new RetrieveAttributeRequest()
-            {
-                EntityLogicalName = Entity,
-                LogicalName = Attribute,
-                RetrieveAsIfPublished = true
-            };
-            RetrieveAttributeResponse rarr = (RetrieveAttributeResponse)service.Execute(rar);
-
-            OptionMetadata op = null;
-            if (rarr.AttributeMetadata.GetType().Name == "PicklistAttributeMetadata")
-                if (((PicklistAttributeMetadata)rarr.AttributeMetadata).OptionSet.Options.Count > 0)
-                    op = ((PicklistAttributeMetadata)rarr.AttributeMetadata).OptionSet.Options.First(x => x.Value == Value);
-
-            if (rarr.AttributeMetadata.GetType().Name == "StateAttributeMetadata")
-                op = ((StateAttributeMetadata)rarr.AttributeMetadata).OptionSet.Options.First(x => x.Value == Value);
-
-            if (rarr.AttributeMetadata.GetType().Name == "StatusAttributeMetadata")
-                op = ((StatusAttributeMetadata)rarr.AttributeMetadata).OptionSet.Options.First(x => x.Value == Value);
-
-            retVal = op.Label.LocalizedLabels[0].Label;
-
-            return string.Format("({0}) {1}", Value, retVal);
-        }
 
         //    SettingsManager.Instance.Save(GetType(), output.ToArray(), ((Microsoft.Xrm.Tooling.Connector.CrmServiceClient)service).ConnectedOrgUniqueName + "_cache");
         //}

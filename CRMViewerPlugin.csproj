@@ -133,6 +133,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Browser.cs" />
+    <Compile Include="EntityTools.cs" />
+    <Compile Include="OptionSetTools.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="ctlCRMViewer.cs">
       <SubType>UserControl</SubType>

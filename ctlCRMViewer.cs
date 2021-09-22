@@ -260,10 +260,6 @@ namespace CRMViewerPlugin
             }
 
         }
-        enum MyEnum
-        {
-
-        }
 
         private void MiDocumentEntity_Click(object sender, EventArgs e)
         {
@@ -543,6 +539,8 @@ private void SetOptionSetValue(string attributeLogicalName, object value)
 
         #endregion
 
+
+
         #region Functions
         private void LoadEntityList()
         {
@@ -609,11 +607,15 @@ private void SetOptionSetValue(string attributeLogicalName, object value)
 
         #endregion
 
+
+
         public ctlCRMViewer()
         {
             InitializeComponent();
             results = new Stack<Result>();
         }
+
+
 
 
         #region Navigation
