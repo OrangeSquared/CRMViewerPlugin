@@ -3,7 +3,6 @@ using Microsoft.Xrm.Sdk.Client;
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata;
 using Microsoft.Xrm.Sdk.Query;
-using NuGet;
 using ScintillaNET;
 using System;
 using System.Collections.Generic;
@@ -275,7 +274,8 @@ namespace CRMViewerPlugin
             dataSet.WriteXml(memoryStream, XmlWriteMode.WriteSchema);
             memoryStream.Flush();
             memoryStream.Position = 0;
-            string retVal = memoryStream.ReadToEnd();
+            StreamReader reader = new StreamReader(memoryStream);
+            string retVal = reader.ReadToEnd();
             memoryStream.Close();
             memoryStream.Dispose();
 

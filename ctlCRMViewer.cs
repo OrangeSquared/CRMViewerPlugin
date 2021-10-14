@@ -218,6 +218,8 @@ namespace CRMViewerPlugin
                 miCreateClass.Click += MiCreateClass_Click;
                 MenuItem miDocumentEntity = new MenuItem("Document Entity");
                 miDocumentEntity.Click += MiDocumentEntity_Click;
+                MenuItem miAnalyzeEntity = new MenuItem("Analyze Entity");
+                miAnalyzeEntity.Click += MiAnalyzeEntity_Click;
 
                 ContextMenu contextMenu = new ContextMenu();
 
@@ -230,6 +232,7 @@ namespace CRMViewerPlugin
                                 miOpenInBrowser,
                                 miCreateClass,
                                 miDocumentEntity,
+                                miAnalyzeEntity,
                             });
                         break;
                     case Result.ResultType.Entity:
@@ -259,6 +262,26 @@ namespace CRMViewerPlugin
                 contextMenu.Show(dgvMain, e.Location);
             }
 
+        }
+
+        private void MiAnalyzeEntity_Click(object sender, EventArgs e)
+        {
+            string entityLogicalName = dgvMain.SelectedRows[0].Cells[0].Value.ToString();
+
+            WorkAsyncInfo wai = new WorkAsyncInfo
+            {
+                Message = "Analyzing Entity " + entityLogicalName,
+                Work = (worker, args) =>
+                {
+                    args.Result= EntityTools.AnalyzeEntity(Service, worker, entityLogicalName);
+                },
+                ProgressChanged = ProgressChanged,
+                PostWorkCallBack = NewResultsAvailable,
+                AsyncArgument = null,
+                MessageHeight = 150,
+                MessageWidth = 340,
+            };
+            WorkAsync(wai);
         }
 
         private void MiDocumentEntity_Click(object sender, EventArgs e)
