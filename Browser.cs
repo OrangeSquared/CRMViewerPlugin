@@ -106,7 +106,7 @@ namespace CRMViewerPlugin
             RetrieveEntityResponse response = (RetrieveEntityResponse)service.Execute(request);
 
             foreach (AttributeMetadata am in response.EntityMetadata.Attributes)
-                if (am.DisplayName.LocalizedLabels.Count > 0 && !defaultAttributes.Contains(am.LogicalName))
+                if (am.DisplayName.LocalizedLabels.Count > 0 && !defaultAttributes.Contains(am.LogicalName) && !am.LogicalName.EndsWith("_base"))
                     retVal.Add(new Tuple<string, string, string>(am.LogicalName, am.AttributeType.ToString(), am.DisplayName.LocalizedLabels[0].Label));
 
             return retVal;

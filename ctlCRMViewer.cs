@@ -325,87 +325,7 @@ namespace CRMViewerPlugin
                 Message = "Building class...",
                 Work = (worker, args) =>
                 {
-                    StringBuilder sb = new StringBuilder();
-                    string entityLogicalName = dgvMain.SelectedRows[0].Cells[0].Value.ToString();
-                    List<Tuple<string, string, string>> attributes = Browser.GetEntityAttributes(Service, entityLogicalName);
-
-                    sb.AppendLine(string.Format(@"
-
-        public {0}()
-        {{
-            LogicalName = ""{0}"";
-        }}
-
-private void SetOptionSetValue(string attributeLogicalName, object value)
-        {{
-            if ((int)value == -1)
-                this[attributeLogicalName] = null;
-            else
-                this[attributeLogicalName] = new OptionSetValue((int)value);
-        }}
-
-        private int GetOptionSetValue(string attributeLogicalName)
-        {{
-            if (this.Contains(attributeLogicalName))
-                return this.GetAttributeValue<OptionSetValue>(attributeLogicalName).Value;
-            else
-                return -1;
-        }}
-", entityLogicalName));
-
-                    attributes.Sort((x, y) => x.Item1.CompareTo(y.Item1));
-
-                    sb.AppendLine("        #region enums");
-                    foreach (Tuple<string, string, string> att in attributes)
-                        if (att.Item2 == "Picklist" || att.Item2 == "Status")
-                        {
-                            List<Tuple<string, int>> ovs = Browser.GetPicklistValues(Service, entityLogicalName, att.Item1);
-                            sb.AppendFormat("public enum {0}_{1}_values\r\n{{\r\n", entityLogicalName, att.Item1);
-                            foreach (Tuple<string, int> ov in ovs)
-                                sb.AppendFormat("{0} = {1},\r\n", CleanForCSName(ov.Item1), ov.Item2);
-                            sb.AppendLine("}");
-                        }
-                    sb.AppendLine("        #endregion");
-
-                    sb.AppendLine("        #region attributes");
-                    foreach (Tuple<string, string, string> att in attributes)
-                        if (att.Item2 == "Picklist" ||
-                            att.Item2 == "Status")
-                            sb.AppendLine(string.Format(@"public {0}_{1}_values {1} {{ get {{ return ({0}_{1}_values)GetOptionSetValue(""{1}""); }} set {{ SetOptionSetValue(""{1}"", value); }} }}"
-                                , entityLogicalName, CleanForCSName(att.Item1), ConvertToCSType(att.Item2)));
-                        else if (att.Item2 == "String" ||
-                                 att.Item2 == "Memo" ||
-                                 att.Item2 == "Money" ||
-                                 att.Item2 == "Lookup" ||
-                                 att.Item2 == "Virtual")
-                            sb.AppendFormat(@"        public {1} {0}
-        {{
-            get {{ return this.GetAttributeValue<{1}>(""{0}""); }}
-            set
-            {{
-                    this[""{0}""] = value;
-            }}
-        }}
-", CleanForCSName(att.Item1), ConvertToCSType(att.Item2));
-                        else
-                        {
-                            System.Diagnostics.Debug.WriteLine(att.Item2);
-                            sb.AppendFormat(@"        public {1}? {0}
-        {{
-            get {{ return this.GetAttributeValue<{1}>(""{0}""); }}
-            set
-            {{
-                if (value.HasValue)
-                    this[""{0}""] = value.Value;
-                else
-                    this[""{0}""] = null;
-            }}
-        }}
-", CleanForCSName(att.Item1), ConvertToCSType(att.Item2));
-                        }
-                    sb.AppendLine("        #endregion");
-
-                    args.Result = sb.ToString();
+                    args.Result = EntityTools.CreateEntityClass(Service, worker, dgvMain.SelectedRows[0].Cells[0].Value.ToString());
                 },
                 ProgressChanged = ProgressChanged,
                 PostWorkCallBack = NewResultsAvailable,
@@ -416,49 +336,7 @@ private void SetOptionSetValue(string attributeLogicalName, object value)
             WorkAsync(wai);
         }
 
-        private string CleanForCSName(string value)
-        {
-            string retVal = string.Empty;
-            for (int i = 0; i < value.Length; i++)
-                if ("abcdefghijklmnopqrstuvwxyz0123456789_".Contains(value.Substring(i, 1).ToLower()))
-                    retVal += value.Substring(i, 1);
-                else
-                    retVal += "_";
 
-            if ("1234567890".Contains(retVal.Substring(0, 1)))
-                retVal = "_" + retVal;
-
-            return retVal;
-        }
-
-        private object ConvertToCSType(string CRMType)
-        {
-            string retVal = CRMType;
-            switch (CRMType)
-            {
-                case "Virtual": retVal = "object"; break;
-                case "Uniqueidentifier": retVal = "Guid"; break;
-                case "Decimal": retVal = "decimal"; break;
-                case "Double": retVal = "double"; break;
-                case "Money":
-                case "DateTime":
-                    break;
-                case "Lookup": retVal = "EntityReference"; break;
-                case "Boolean": retVal = "bool"; break;
-                case "Integer": retVal = "int"; break;
-                case "String":
-                case "Memo":
-                    retVal = "string"; break;
-                case "Picklist":
-                case "Status":
-                    retVal = "OptionSetValue"; break;
-                default:
-                    System.Diagnostics.Debug.WriteLine(CRMType);
-                    break;
-            }
-
-            return retVal;
-        }
 
         private void MiCreateEnum_Click(object sender, EventArgs e)
         {
