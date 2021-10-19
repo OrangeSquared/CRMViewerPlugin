@@ -253,6 +253,7 @@ namespace CRMViewerPlugin
                         contextMenu = new ContextMenu(new MenuItem[]
                             {
                                 miCopyKey,
+                                miOpenInBrowser,
                             });
                         break;
                     default:
@@ -375,6 +376,7 @@ namespace CRMViewerPlugin
                     Work = (worker, args) =>
                     {
                         Result result = Browser.GetRecordResult(Service, cache, results.Peek().EntityLogicalName, id, worker);
+                        result.Header = string.Format("{0}{{{1}}}", results.Peek().EntityLogicalName, id);
                         if (result != null)
                         {
                             results.Push(result);
@@ -411,7 +413,7 @@ namespace CRMViewerPlugin
                 case Result.ResultType.PickList:
                     break;
                 case Result.ResultType.Record:
-                    //targetUri = string.Format("{0}//main.aspx?etn={1}&pagetype=entityrecord&id={2}", rootURI, results.Peek().EntityLogicalName, recordId);
+                    targetUri = string.Format("{0}//main.aspx?etn={1}&pagetype=entityrecord&id={2}", rootURI, results.Peek().EntityLogicalName, results.Peek().EntityRecordId);
                     break;
                 default:
                     break;
@@ -534,6 +536,7 @@ namespace CRMViewerPlugin
                         case Result.ResultType.EntityList:
                             result = Browser.GetEntityResult(Service, cache, dgvMain.Rows[row].Cells[0].Value.ToString(), worker);
                             break;
+
                         case Result.ResultType.Entity:
                             string datatype = dgvMain.Rows[row].Cells[4].Value.ToString();
                             if (datatype == "Picklist" || datatype == "State" || datatype == "Status")
@@ -541,11 +544,25 @@ namespace CRMViewerPlugin
                             else if (datatype == "Lookup")
                                 result = Browser.GetEntityResult(Service, cache, dgvMain.Rows[row].Cells[5].Value.ToString(), worker);
                             break;
+
                         case Result.ResultType.PickList:
 
                             break;
+
                         case Result.ResultType.Record:
+                            string cell3val = (string)dgvMain.Rows[row].Cells[3].Value;
+                            if (cell3val == "Lookup")
+                            {
+                                string entRef = (string)dgvMain.Rows[row].Cells[4].Value;
+                                entRef = entRef.Substring(entRef.IndexOf("(") + 1);
+                                entRef = entRef.Substring(0, entRef.Length - 1);
+                                string[] vals = entRef.Split(':');
+
+                                result = Browser.GetRecordResult(Service, cache, vals[0], new Guid(vals[1]), worker);
+                                result.Header = string.Format("{0}{{{1}}}", vals[0], vals[1]);
+                            }
                             break;
+
                         default:
                             break;
                     }
