@@ -102,7 +102,21 @@ namespace CRMViewerPlugin
         }
         private void ctlCRMViewer_ConnectionUpdated(object sender, ConnectionUpdatedEventArgs e)
         {
+            if (!SettingsManager.Instance.TryLoad(GetType(), out mySettings))
+            {
+                mySettings = new Settings();
 
+                LogWarning("Settings not found => a new settings file has been created!");
+
+                SettingsManager.Instance.Save(GetType(), mySettings);
+            }
+            else
+            {
+                LogInfo("Settings found and loaded");
+            }
+
+            results = new Stack<Result>();
+            ExecuteMethod(LoadEntityList);
         }
 
 
