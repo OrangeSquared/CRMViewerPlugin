@@ -1,4 +1,5 @@
-﻿using Microsoft.Xrm.Sdk;
+﻿using Microsoft.Crm.Sdk.Messages;
+using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Client;
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata;
@@ -282,7 +283,7 @@ namespace CRMViewerPlugin
             return retVal;
         }
 
-        
+
 
         internal static List<Tuple<string, int>> GetPicklistValues(IOrganizationService service, string entityLogicalName, string attributeLogicalName)
         {
@@ -408,8 +409,9 @@ namespace CRMViewerPlugin
 
             string fetchXml = null;
 
-            if (recordId != Guid.Empty)
-                fetchXml = string.Format(@"
+            if (recordId == Guid.Empty) recordId = Guid.NewGuid();
+
+            fetchXml = string.Format(@"
                             <fetch top='1'>
                               <entity name='{0}'>
                                 <filter>
@@ -417,12 +419,6 @@ namespace CRMViewerPlugin
                                 </filter>
                               </entity>
                             </fetch>", entityLogicalName, recordId);
-            else
-                fetchXml = string.Format(@"
-                            <fetch top='1'>
-                              <entity name='{0}'>
-                              </entity>
-                            </fetch>", entityLogicalName);
 
             EntityCollection ec = service.RetrieveMultiple(new FetchExpression(fetchXml));
 
@@ -508,7 +504,8 @@ namespace CRMViewerPlugin
                 case "DateTime": return entity.GetAttributeValue<DateTime>(AttributeLogicalName).ToString("yyyy-MM-ddTHH:mm:ss"); break;
                 case "Guid": return entity.GetAttributeValue<Guid>(AttributeLogicalName).ToString(); break;
                 case "OptionSetValue":
-                    return OptionSetTools.GetOptionSetValue(service, entity.LogicalName, AttributeLogicalName, entity.GetAttributeValue<OptionSetValue>(AttributeLogicalName).Value, cache);
+                    return String.Format("({0}) {1}", entity.GetAttributeValue<OptionSetValue>(AttributeLogicalName).Value, entity.FormattedValues[AttributeLogicalName]);
+                    //return OptionSetTools.GetOptionSetValue(service, entity.LogicalName, AttributeLogicalName, entity.GetAttributeValue<OptionSetValue>(AttributeLogicalName).Value, cache);
                     break;
 
                 case "EntityReference":

@@ -16,6 +16,7 @@ using XrmToolBox.Extensibility.Interfaces;
 using XrmToolBox.Extensibility.Args;
 using System.Runtime.Remoting.Contexts;
 using System.Security.Cryptography.X509Certificates;
+using System.Activities;
 
 namespace CRMViewerPlugin
 {
@@ -81,7 +82,7 @@ namespace CRMViewerPlugin
             }
 
             results = new Stack<Result>();
-            ExecuteMethod(LoadEntityList);
+            //ExecuteMethod(LoadEntityList);
         }
 
         private void tsbClose_Click(object sender, EventArgs e) { CloseTool(); }
@@ -97,7 +98,7 @@ namespace CRMViewerPlugin
                 mySettings.LastUsedOrganizationWebappUrl = detail.WebApplicationUrl;
                 LogInfo("Connection has changed to: {0}", detail.WebApplicationUrl);
                 results = new Stack<Result>();
-                LoadEntityList();
+                ExecuteMethod(LoadEntityList);
             }
         }
         private void ctlCRMViewer_ConnectionUpdated(object sender, ConnectionUpdatedEventArgs e)
@@ -116,7 +117,7 @@ namespace CRMViewerPlugin
             }
 
             results = new Stack<Result>();
-            ExecuteMethod(LoadEntityList);
+            //ExecuteMethod(LoadEntityList);
         }
 
 
@@ -254,7 +255,6 @@ namespace CRMViewerPlugin
                             {
                                 miCopyKey,
                                 miOpenInBrowser,
-                                miOpenRecord,
                             }); break;
                     case Result.ResultType.PickList:
                         contextMenu = new ContextMenu(new MenuItem[]
@@ -288,7 +288,7 @@ namespace CRMViewerPlugin
                 Message = "Analyzing Entity " + entityLogicalName,
                 Work = (worker, args) =>
                 {
-                    args.Result= EntityTools.AnalyzeEntity(Service, worker, entityLogicalName);
+                    args.Result = EntityTools.AnalyzeEntity(Service, worker, entityLogicalName);
                 },
                 ProgressChanged = ProgressChanged,
                 PostWorkCallBack = NewResultsAvailable,
@@ -384,6 +384,76 @@ namespace CRMViewerPlugin
             }
             if (id != Guid.Empty)
             {
+                WorkAsyncInfo wai = new WorkAsyncInfo
+                {
+                    Message = "Retrieving info from CRM...",
+                    Work = (worker, args) =>
+                    {
+                        Result result = Browser.GetRecordResult(Service, cache, results.Peek().EntityLogicalName, id, worker);
+                        result.Header = string.Format("{0}{{{1}}}", results.Peek().EntityLogicalName, id);
+                        if (result != null)
+                        {
+                            results.Push(result);
+                            if (!result.FromCache)
+                                SaveCache();
+                        }
+
+                    },
+                    ProgressChanged = ProgressChanged,
+                    PostWorkCallBack = NewResultsAvailable,
+                    AsyncArgument = null,
+                    MessageHeight = 150,
+                    MessageWidth = 340
+                };
+                WorkAsync(wai);
+            }
+        }
+
+        private void OpenLatest(bool LatestUpdated)
+        {
+            Guid id = Guid.Empty;
+            string fetchXML = string.Format(@"<fetch top='1' >  <entity name='{0}' >      <order attribute='{1}' descending='true' />  </entity></fetch>",
+                    results.Peek().EntityLogicalName,
+                    LatestUpdated ? "createdon" : "modifiedon");
+            EntityCollection ec = Service.RetrieveMultiple(new FetchExpression(fetchXML));
+            if (ec.Entities.Count > 0)
+                id = ec.Entities[0].Id;
+
+            WorkAsyncInfo wai = new WorkAsyncInfo
+            {
+                Message = "Retrieving info from CRM...",
+                Work = (worker, args) =>
+                {
+                    Result result = Browser.GetRecordResult(Service, cache, results.Peek().EntityLogicalName, id, worker);
+                    result.Header = string.Format("{0}{{{1}}}", results.Peek().EntityLogicalName, id);
+                    if (result != null)
+                    {
+                        results.Push(result);
+                        if (!result.FromCache)
+                            SaveCache();
+                    }
+
+                },
+                ProgressChanged = ProgressChanged,
+                PostWorkCallBack = NewResultsAvailable,
+                AsyncArgument = null,
+                MessageHeight = 150,
+                MessageWidth = 340
+            };
+            WorkAsync(wai);
+        }
+        private void OpenRecord()
+        {
+            string possibleid = tstbRecordId.Text;
+            Guid id = Guid.Empty;
+
+            if (!Guid.TryParse(possibleid, out id))
+            {
+                string fetchXML = string.Format(@"<fetch top='1' >  <entity name='{0}' >    <attribute name='{0}id' />  </entity></fetch>", results.Peek().EntityLogicalName);
+                EntityCollection ec = Service.RetrieveMultiple(new FetchExpression(fetchXML));
+                if (ec.Entities.Count > 0)
+                    id = ec.Entities[0].Id;
+
                 WorkAsyncInfo wai = new WorkAsyncInfo
                 {
                     Message = "Retrieving info from CRM...",
@@ -510,6 +580,12 @@ namespace CRMViewerPlugin
                 dgvRelationships.DataSource = null;
             }
 
+            tslRecordId.Visible = results.Peek().DataType == Result.ResultType.Entity;
+            tstbRecordId.Visible = results.Peek().DataType == Result.ResultType.Entity;
+            tsbLoadRecordId.Visible = results.Peek().DataType == Result.ResultType.Entity;
+            tsbLoadLatest.Visible = results.Peek().DataType == Result.ResultType.Entity;
+            tsbLoadNewest.Visible = results.Peek().DataType == Result.ResultType.Entity;
+
             SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs(string.Format("{0} results loaded", dgvMain.Rows.Count)));
         }
 
@@ -518,6 +594,8 @@ namespace CRMViewerPlugin
             if (results.Count > 1)
             {
                 results.Pop();
+                if (results.Peek().EntityRecordId != null && results.Peek().EntityRecordId != Guid.Empty)
+                    tstbRecordId.Text = results.Peek().EntityRecordId.ToString();
                 PaintResults();
             }
         }
@@ -638,6 +716,21 @@ namespace CRMViewerPlugin
                 MessageWidth = 340
             };
             WorkAsync(wai);
+        }
+
+        private void tsbLoadNewest_Click(object sender, EventArgs e)
+        {
+            OpenLatest(false);
+        }
+
+        private void tsbLoadLatest_Click(object sender, EventArgs e)
+        {
+            OpenLatest(true);
+        }
+
+        private void tsbLoadRecordId_Click(object sender, EventArgs e)
+        {
+            OpenRecord();
         }
 
 

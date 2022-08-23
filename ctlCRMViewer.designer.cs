@@ -33,14 +33,17 @@
             this.toolStripMenu = new System.Windows.Forms.ToolStrip();
             this.tsbBack = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.stbCustomFields = new System.Windows.Forms.ToolStripButton();
-            this.tssSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.tslCached = new System.Windows.Forms.ToolStripLabel();
             this.tsbRefresh = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.tsbSearch = new System.Windows.Forms.ToolStripTextBox();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.tslRecordId = new System.Windows.Forms.ToolStripLabel();
+            this.tstbRecordId = new System.Windows.Forms.ToolStripTextBox();
+            this.tsbLoadRecordId = new System.Windows.Forms.ToolStripButton();
+            this.tsbLoadNewest = new System.Windows.Forms.ToolStripButton();
+            this.tsbLoadLatest = new System.Windows.Forms.ToolStripButton();
             this.gbMain = new System.Windows.Forms.GroupBox();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.dgvMain = new System.Windows.Forms.DataGridView();
@@ -62,14 +65,17 @@
             this.toolStripMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsbBack,
             this.toolStripSeparator3,
-            this.stbCustomFields,
-            this.tssSeparator1,
             this.tslCached,
             this.tsbRefresh,
             this.toolStripSeparator1,
             this.tsbSearch,
             this.toolStripLabel1,
-            this.toolStripSeparator2});
+            this.toolStripSeparator2,
+            this.tslRecordId,
+            this.tstbRecordId,
+            this.tsbLoadRecordId,
+            this.tsbLoadNewest,
+            this.tsbLoadLatest});
             this.toolStripMenu.Location = new System.Drawing.Point(0, 0);
             this.toolStripMenu.Name = "toolStripMenu";
             this.toolStripMenu.Size = new System.Drawing.Size(1128, 25);
@@ -88,20 +94,6 @@
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
             this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
-            // 
-            // stbCustomFields
-            // 
-            this.stbCustomFields.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.stbCustomFields.Image = ((System.Drawing.Image)(resources.GetObject("stbCustomFields.Image")));
-            this.stbCustomFields.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.stbCustomFields.Name = "stbCustomFields";
-            this.stbCustomFields.Size = new System.Drawing.Size(81, 22);
-            this.stbCustomFields.Text = "Show Default";
-            // 
-            // tssSeparator1
-            // 
-            this.tssSeparator1.Name = "tssSeparator1";
-            this.tssSeparator1.Size = new System.Drawing.Size(6, 25);
             // 
             // tslCached
             // 
@@ -132,6 +124,7 @@
             // tsbSearch
             // 
             this.tsbSearch.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.tsbSearch.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.tsbSearch.Name = "tsbSearch";
             this.tsbSearch.Size = new System.Drawing.Size(200, 25);
             this.tsbSearch.TextChanged += new System.EventHandler(this.tsbSearch_TextChanged);
@@ -148,6 +141,49 @@
             this.toolStripSeparator2.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.toolStripSeparator2.Name = "toolStripSeparator2";
             this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
+            // 
+            // tslRecordId
+            // 
+            this.tslRecordId.Name = "tslRecordId";
+            this.tslRecordId.Size = new System.Drawing.Size(57, 22);
+            this.tslRecordId.Text = "Record Id";
+            // 
+            // tstbRecordId
+            // 
+            this.tstbRecordId.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.tstbRecordId.Name = "tstbRecordId";
+            this.tstbRecordId.Size = new System.Drawing.Size(240, 25);
+            // 
+            // tsbLoadRecordId
+            // 
+            this.tsbLoadRecordId.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.tsbLoadRecordId.Enabled = false;
+            this.tsbLoadRecordId.Image = ((System.Drawing.Image)(resources.GetObject("tsbLoadRecordId.Image")));
+            this.tsbLoadRecordId.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbLoadRecordId.Name = "tsbLoadRecordId";
+            this.tsbLoadRecordId.Size = new System.Drawing.Size(37, 22);
+            this.tsbLoadRecordId.Text = "Load";
+            this.tsbLoadRecordId.Click += new System.EventHandler(this.tsbLoadRecordId_Click);
+            // 
+            // tsbLoadNewest
+            // 
+            this.tsbLoadNewest.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.tsbLoadNewest.Image = ((System.Drawing.Image)(resources.GetObject("tsbLoadNewest.Image")));
+            this.tsbLoadNewest.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbLoadNewest.Name = "tsbLoadNewest";
+            this.tsbLoadNewest.Size = new System.Drawing.Size(79, 22);
+            this.tsbLoadNewest.Text = "Load Newest";
+            this.tsbLoadNewest.Click += new System.EventHandler(this.tsbLoadNewest_Click);
+            // 
+            // tsbLoadLatest
+            // 
+            this.tsbLoadLatest.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.tsbLoadLatest.Image = ((System.Drawing.Image)(resources.GetObject("tsbLoadLatest.Image")));
+            this.tsbLoadLatest.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbLoadLatest.Name = "tsbLoadLatest";
+            this.tsbLoadLatest.Size = new System.Drawing.Size(71, 22);
+            this.tsbLoadLatest.Text = "Load Latest";
+            this.tsbLoadLatest.Click += new System.EventHandler(this.tsbLoadLatest_Click);
             // 
             // gbMain
             // 
@@ -252,7 +288,6 @@
         #endregion
         private System.Windows.Forms.ToolStrip toolStripMenu;
         private System.Windows.Forms.ToolStripButton tsbBack;
-        private System.Windows.Forms.ToolStripSeparator tssSeparator1;
         private System.Windows.Forms.GroupBox gbMain;
         private System.Windows.Forms.DataGridView dgvMain;
         private System.Windows.Forms.ToolStripLabel tslCached;
@@ -262,9 +297,13 @@
         private System.Windows.Forms.ToolStripTextBox tsbSearch;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
-        private System.Windows.Forms.ToolStripButton stbCustomFields;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.DataGridView dgvRelationships;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.ToolStripLabel tslRecordId;
+        private System.Windows.Forms.ToolStripTextBox tstbRecordId;
+        private System.Windows.Forms.ToolStripButton tsbLoadRecordId;
+        private System.Windows.Forms.ToolStripButton tsbLoadNewest;
+        private System.Windows.Forms.ToolStripButton tsbLoadLatest;
     }
 }
