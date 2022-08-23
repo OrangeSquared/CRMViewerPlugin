@@ -409,58 +409,51 @@ namespace CRMViewerPlugin
             }
         }
 
-        private void OpenLatest(bool LatestUpdated)
+        private string OpenLatest(bool LatestUpdated)
         {
+            string retVal = "";
+
+
             Guid id = Guid.Empty;
             string fetchXML = string.Format(@"<fetch top='1' >  <entity name='{0}' >      <order attribute='{1}' descending='true' />  </entity></fetch>",
-                    results.Peek().EntityLogicalName,
-                    LatestUpdated ? "createdon" : "modifiedon");
+            results.Peek().EntityLogicalName,
+            LatestUpdated ? "createdon" : "modifiedon");
             EntityCollection ec = Service.RetrieveMultiple(new FetchExpression(fetchXML));
             if (ec.Entities.Count > 0)
                 id = ec.Entities[0].Id;
 
-            WorkAsyncInfo wai = new WorkAsyncInfo
-            {
-                Message = "Retrieving info from CRM...",
-                Work = (worker, args) =>
-                {
-                    Result result = Browser.GetRecordResult(Service, cache, results.Peek().EntityLogicalName, id, worker);
-                    result.Header = string.Format("{0}{{{1}}}", results.Peek().EntityLogicalName, id);
-                    if (result != null)
-                    {
-                        results.Push(result);
-                        if (!result.FromCache)
-                            SaveCache();
-                    }
 
-                },
-                ProgressChanged = ProgressChanged,
-                PostWorkCallBack = NewResultsAvailable,
-                AsyncArgument = null,
-                MessageHeight = 150,
-                MessageWidth = 340
-            };
-            WorkAsync(wai);
+            if (id != Guid.Empty)
+                retVal = id.ToString();
+            else
+                retVal = String.Empty;
+
+            return retVal;
         }
+
         private void OpenRecord()
         {
-            string possibleid = tstbRecordId.Text;
             Guid id = Guid.Empty;
-
-            if (!Guid.TryParse(possibleid, out id))
+            if (Guid.TryParse(tstbRecordId.Text, out id))
             {
-                string fetchXML = string.Format(@"<fetch top='1' >  <entity name='{0}' >    <attribute name='{0}id' />  </entity></fetch>", results.Peek().EntityLogicalName);
-                EntityCollection ec = Service.RetrieveMultiple(new FetchExpression(fetchXML));
-                if (ec.Entities.Count > 0)
-                    id = ec.Entities[0].Id;
+                string entln = results.Peek().EntityLogicalName;
+                OpenRecord(entln, id);
+            }
+        }
 
+        private void OpenRecord(string EntityLogicalName, Guid id)
+        {
+            string possibleid = tstbRecordId.Text;
+
+            if (Guid.TryParse(possibleid, out id))
+            {
                 WorkAsyncInfo wai = new WorkAsyncInfo
                 {
                     Message = "Retrieving info from CRM...",
                     Work = (worker, args) =>
                     {
-                        Result result = Browser.GetRecordResult(Service, cache, results.Peek().EntityLogicalName, id, worker);
-                        result.Header = string.Format("{0}{{{1}}}", results.Peek().EntityLogicalName, id);
+                        Result result = Browser.GetRecordResult(Service, cache, EntityLogicalName, id, worker);
+                        result.Header = string.Format("{0}{{{1}}}", EntityLogicalName, id);
                         if (result != null)
                         {
                             results.Push(result);
@@ -594,8 +587,13 @@ namespace CRMViewerPlugin
             if (results.Count > 1)
             {
                 results.Pop();
+                tsbLoadRecordId.Enabled = false;
                 if (results.Peek().EntityRecordId != null && results.Peek().EntityRecordId != Guid.Empty)
+                {
                     tstbRecordId.Text = results.Peek().EntityRecordId.ToString();
+                    tsbLoadRecordId.Enabled = true;
+                }
+
                 PaintResults();
             }
         }
@@ -616,6 +614,7 @@ namespace CRMViewerPlugin
         #region Navigation
         private void NavigateIn(int row)
         {
+                        tstbRecordId.Text = string.Empty;
             WorkAsyncInfo wai = new WorkAsyncInfo
             {
                 Message = "Retrieving info from CRM...",
@@ -699,6 +698,11 @@ namespace CRMViewerPlugin
                         case Result.ResultType.PickList:
                             break;
                         case Result.ResultType.Record:
+                            Guid rid = results.Peek().EntityRecordId;
+                            string entln = results.Peek().EntityLogicalName;
+                            newResult = Browser.GetRecordResult(Service, cache, entln, rid, worker);
+                            newResult.Header = string.Format("{0}{{{1}}}", entln, rid);
+
                             break;
                         default:
                             break;
@@ -720,12 +724,12 @@ namespace CRMViewerPlugin
 
         private void tsbLoadNewest_Click(object sender, EventArgs e)
         {
-            OpenLatest(false);
+            tstbRecordId.Text = OpenLatest(false);
         }
 
         private void tsbLoadLatest_Click(object sender, EventArgs e)
         {
-            OpenLatest(true);
+            tstbRecordId.Text = OpenLatest(true);
         }
 
         private void tsbLoadRecordId_Click(object sender, EventArgs e)
@@ -733,155 +737,14 @@ namespace CRMViewerPlugin
             OpenRecord();
         }
 
+        private void tstbRecordId_TextChanged(object sender, EventArgs e)
+        {
+            Guid guid = Guid.Empty;
+            tsbLoadRecordId.Enabled = Guid.TryParse(tstbRecordId.Text, out guid);
+        }
+
 
         #endregion
 
-
-
-
-
-
-
-
-
-
-        //private void DoQuickSearch()
-        //{
-        //    if (!string.IsNullOrEmpty(quickSearch) && quickSearch.Length >= 3)
-        //    {
-        //        if (dgvMain.SelectedRows.Count == 0)
-        //            if (quickSearchReverse)
-        //                dgvMain.Rows[dgvMain.RowCount - 1].Selected = true;
-        //            else
-        //                dgvMain.Rows[0].Selected = true;
-
-        //        int selected = dgvMain.SelectedRows[0].Index;
-        //        bool found = false;
-        //        while (selected < dgvMain.Rows.Count && selected > -1)
-        //        {
-        //            foreach (DataGridViewCell col in dgvMain.Rows[selected].Cells)
-        //                if (col.Value.ToString().ToUpper().Contains(quickSearch))
-        //                {
-        //                    dgvMain.Rows[selected].Selected = true;
-        //                    dgvMain.Rows[selected].Visible = true;
-        //                    dgvMain.CurrentCell = dgvMain.Rows[selected].Cells[1];
-        //                    SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs(string.Format("found '{0}'", quickSearch)));
-        //                    found = true;
-        //                    break;
-        //                }
-        //            if (found) break;
-        //            selected += quickSearchReverse ? -1 : 1;
-        //        }
-        //    }
-        //}
-
-        //private void toolStripMenu_KeyDown(object sender, KeyEventArgs e)
-        //{
-        //    if (e.KeyCode == Keys.Escape)
-        //        PageBack();
-
-        //    if (e.KeyCode == Keys.F2)
-        //        tsbSearch.Focus();
-
-        //    if (e.KeyCode == Keys.F5)
-        //        Refresh();
-
-        //    if (e.KeyCode == Keys.F4)
-        //        ((Browser)results.Peek()).OpenInBrowser();
-
-        //}
-
-        //private void tsbLoadRecord_Click(object sender, EventArgs e)
-        //{
-        //    if (results.Peek().GetType().Name == "Browser" && ((Browser)results.Peek()).currentSelectionType == Browser.SelectionType.Entity)
-        //    {
-        //        Guid recordId = Guid.Empty;
-        //        if (Guid.TryParse(tstbRecordID.Text.Trim(), out recordId))
-        //        {
-        //            WorkAsyncInfo wai = new WorkAsyncInfo
-        //            {
-        //                Message = "Retrieving info from CRM...",
-        //                Work = (worker, args) =>
-        //                {
-        //                    Browser browser = new Browser(Service);
-        //                    browser.LoadRecord(((Browser)results.Peek()).EntityLogicalName, recordId, stbCustomFields.Checked, worker);
-        //                    Result result = browser;
-
-        //                    if (result != null)
-        //                        results.Push(result);
-        //                },
-        //                ProgressChanged = ProgressChanged,
-        //                PostWorkCallBack = NewResultsAvailable,
-        //                AsyncArgument = null,
-        //                MessageHeight = 150,
-        //                MessageWidth = 340
-        //            };
-        //            WorkAsync(wai);
-
-
-        //        }
-        //    }
-        //}
-
-        //private void stbCustomFields_Click(object sender, EventArgs e)
-        //{
-        //    stbCustomFields.Checked = !stbCustomFields.Checked;
-        //    mySettings.ShowDefaultAttributes = stbCustomFields.Checked;
-        //    SettingsManager.Instance.Save(GetType(), mySettings);
-        //    WorkAsyncInfo wai = new WorkAsyncInfo
-        //    {
-        //        Message = "Retrieving info from CRM...",
-        //        Work = (worker, args) =>
-        //        {
-        //            results.Peek().Refresh(worker);
-        //        },
-        //        ProgressChanged = ProgressChanged,
-        //        PostWorkCallBack = NewResultsAvailable,
-        //        AsyncArgument = null,
-        //        MessageHeight = 150,
-        //        MessageWidth = 340
-        //    };
-        //    WorkAsync(wai);
-
-        //}
-
-        //internal string SettingValue(string key)
-        //{
-        //    switch (key)
-        //    {
-        //        case "showDefaultAttributes": return stbCustomFields.Checked ? "true" : "false"; break;
-        //        default: return ""; break;
-        //    }
-        //}
-
-
-        //private void miCopyKey_Click(object sender, EventArgs e)
-        //{
-        //    Clipboard.SetText(dgvMain.SelectedRows[0].Cells[1].Value.ToString());
-        //}
-
-        //private void miCopyAll_Click(object sender, EventArgs e)
-        //{
-        //    DataTable dt = results.Peek().Data;
-        //    string[,] cb = new string[dt.Rows.Count, dt.Columns.Count - 1];
-        //    StringBuilder sb = new StringBuilder();
-
-        //    for (int row = 0; row < dt.Rows.Count; row++)
-        //    {
-        //        for (int col = 0; col < cb.GetUpperBound(1); col++)
-        //            cb[row, col] = dt.Rows[row][col + 1].ToString();
-        //        object[] notfirstcolumn = new object[dt.Columns.Count - 1];
-        //        for (int i = 0; i <= notfirstcolumn.GetUpperBound(0); i++)
-        //            notfirstcolumn[i] = dt.Rows[row].ItemArray[i + 1];
-        //        sb.Append(string.Join("\t", Array.ConvertAll<object, string>(notfirstcolumn, ConvertObjectToString)) + "\r\n");
-        //    }
-        //    //Clipboard.SetDataObject(cb);
-        //    Clipboard.SetText(sb.ToString());
-        //}
-
-        //private string ConvertObjectToString(object input)
-        //{
-        //    return input?.ToString() ?? string.Empty;
-        //}
     }
 }

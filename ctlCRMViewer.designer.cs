@@ -147,12 +147,15 @@
             this.tslRecordId.Name = "tslRecordId";
             this.tslRecordId.Size = new System.Drawing.Size(57, 22);
             this.tslRecordId.Text = "Record Id";
+            this.tslRecordId.Visible = false;
             // 
             // tstbRecordId
             // 
             this.tstbRecordId.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.tstbRecordId.Name = "tstbRecordId";
             this.tstbRecordId.Size = new System.Drawing.Size(240, 25);
+            this.tstbRecordId.Visible = false;
+            this.tstbRecordId.TextChanged += new System.EventHandler(this.tstbRecordId_TextChanged);
             // 
             // tsbLoadRecordId
             // 
@@ -163,6 +166,7 @@
             this.tsbLoadRecordId.Name = "tsbLoadRecordId";
             this.tsbLoadRecordId.Size = new System.Drawing.Size(37, 22);
             this.tsbLoadRecordId.Text = "Load";
+            this.tsbLoadRecordId.Visible = false;
             this.tsbLoadRecordId.Click += new System.EventHandler(this.tsbLoadRecordId_Click);
             // 
             // tsbLoadNewest
@@ -171,8 +175,10 @@
             this.tsbLoadNewest.Image = ((System.Drawing.Image)(resources.GetObject("tsbLoadNewest.Image")));
             this.tsbLoadNewest.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsbLoadNewest.Name = "tsbLoadNewest";
-            this.tsbLoadNewest.Size = new System.Drawing.Size(79, 22);
-            this.tsbLoadNewest.Text = "Load Newest";
+            this.tsbLoadNewest.Size = new System.Drawing.Size(50, 22);
+            this.tsbLoadNewest.Text = "Newest";
+            this.tsbLoadNewest.ToolTipText = "Get Newest";
+            this.tsbLoadNewest.Visible = false;
             this.tsbLoadNewest.Click += new System.EventHandler(this.tsbLoadNewest_Click);
             // 
             // tsbLoadLatest
@@ -181,8 +187,8 @@
             this.tsbLoadLatest.Image = ((System.Drawing.Image)(resources.GetObject("tsbLoadLatest.Image")));
             this.tsbLoadLatest.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsbLoadLatest.Name = "tsbLoadLatest";
-            this.tsbLoadLatest.Size = new System.Drawing.Size(71, 22);
-            this.tsbLoadLatest.Text = "Load Latest";
+            this.tsbLoadLatest.Size = new System.Drawing.Size(42, 22);
+            this.tsbLoadLatest.Text = "Latest";
             this.tsbLoadLatest.Click += new System.EventHandler(this.tsbLoadLatest_Click);
             // 
             // gbMain

@@ -18,9 +18,9 @@ namespace CRMViewerPlugin
         ExportMetadata("SmallImageBase64", null),
         // Please specify the base64 content of a 80x80 pixels image
         ExportMetadata("BigImageBase64", null),
-        ExportMetadata("BackgroundColor", "Lavender"),
+        ExportMetadata("BackgroundColor", "Orange"),
         ExportMetadata("PrimaryFontColor", "Black"),
-        ExportMetadata("SecondaryFontColor", "Gray")]
+        ExportMetadata("SecondaryFontColor", "DarkGray")]
     public class Plugin : PluginBase
     {
         public override IXrmToolBoxPluginControl GetControl()
